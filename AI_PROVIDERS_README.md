@@ -95,16 +95,19 @@ ollama pull codellama:7b
 - **✅ Cost**: Competitive pay-per-token pricing
 
 ### Setup
-1. Sign up at https://opencodezen.com
+1. Sign up at https://opencode.ai
 2. Generate API key in dashboard
 3. Add to .env: `OPENCODEZEN_API_KEY=your_key`
 4. Test connection with setup script
 
 ### Available Models
-- **opencodezen-7b** - Fast, efficient
-- **opencodezen-13b** - Balanced performance
-- **opencodezen-34b** - Powerful reasoning
-- **opencodezen-70b** - Maximum capability
+- **gpt-5.6-sol** - Latest, highest performance
+- **gpt-5.6-terra** - Advanced reasoning
+- **gpt-5.5** - General purpose
+- **claude-opus-5** - Premium Claude model
+- **claude-sonnet-5** - Balanced Claude
+- **gemini-3.7-flash** - Fast multimodal
+- **deepseek-v4-pro** - Advanced coding
 
 ### Use Cases
 - Complex reasoning tasks
@@ -317,7 +320,7 @@ echo $OPENCODEZEN_API_KEY
 
 # Test connection
 curl -H "Authorization: Bearer $OPENCODEZEN_API_KEY" \
-  https://api.opencodezen.com/v1/models
+  https://opencode.ai/zen/v1/models
 ```
 
 ### OpenAI Issues
