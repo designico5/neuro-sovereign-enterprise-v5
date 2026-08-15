@@ -96,6 +96,21 @@ intelligent_routing = true
 privacy_aware_routing = true
 cost_optimization = true
 
+[voice_interface] # Ebene 6c - Voice Cognitive
+enabled = true
+mode = "full_duplex"
+architecture = "hybrid_local_cloud"
+config_file = "./layers/6_cognitive/voice_interface_config.json"
+asr_manager = "./layers/6_cognitive/hybrid_asr_manager.py"
+tts_manager = "./layers/6_cognitive/hybrid_tts_manager.py"
+agent_orchestrator = "./layers/6_cognitive/agent_orchestrator.py"
+tool_integration = "./layers/6_cognitive/tool_integration.py"
+audio_processor = "./layers/6_cognitive/realtime_audio_processor.py"
+communication_interface = "./layers/6_cognitive/communication_interface.py"
+multi_agent_system = true
+real_time_processing = true
+websocket_server = true
+
 [verification_proof] # Ebene 8
 enabled = true
 verifier_type = "GROUP_BASED_GRPO"
@@ -114,7 +129,7 @@ symbiosis_optimization = true
 safety_first_evolution = true
 
 # --- INFRASTRUKTUR EBENEN (6-1) ---
-[execution_sandbox] # Ebene 6
+[execution_sandbox] # Ebene 6 - Infrastructure
 enabled = true
 time_travel_debugger = true
 docker_isolation = true
