@@ -80,3 +80,28 @@ vulnerability_report_*.md
 /tmp/
 temp/
 tmp/
+
+# NSE Platform Runtime State
+state/ledger/*.db
+state/ledger/*.db-wal
+state/ledger/*.db-shm
+state/ledger/sbom/
+state/ethos/
+state/wallets/
+state/backups/
+nse_state.json
+*.sbom.json
+sbom-generated.json
+
+# Python build artifacts
+*.egg-info/
+*.egg-link/
+.eggs/
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/crash.log
+terraform/terraform.tfvars
+terraform/*.auto.tfvars

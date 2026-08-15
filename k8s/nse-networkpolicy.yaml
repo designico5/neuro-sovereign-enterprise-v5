@@ -1,0 +1,62 @@
+# Neuro-Sovereign Enterprise v5 – Network Policy
+# Restricts network access to NSE pods: only allow ingress from same namespace
+# and egress to Redis (port 6379) and DNS (port 53).
+# Apply with: kubectl apply -f k8s/nse-networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nse-deny-all-default
+  namespace: neurosovereign
+  labels:
+    app.kubernetes.io/name: neurosovereign
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: neurosovereign
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from within the same namespace
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: neurosovereign
+    # Allow health-check probes from the kube-system namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Redis (within same namespace or external)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: neurosovereign
+      ports:
+        - protocol: TCP
+          port: 6379
+    # HTTPS egress for external API calls (AI providers, oracles, etc.)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

@@ -1,0 +1,68 @@
+{
+  "name": "neuro-sovereign-enterprise-desktop",
+  "version": "5.0.0",
+  "description": "Neuro-Sovereign Enterprise v5 Desktop Shell (Electron)",
+  "main": "electron/main.js",
+  "author": "NeuroSovereign",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac --x64 --arm64",
+    "build:linux": "electron-builder --linux --x64",
+    "build:all": "electron-builder -mw",
+    "postinstall": "electron-builder install-app-deps",
+    "audit": "npm audit --audit-level=high && npm list"
+  },
+  "dependencies": {
+    "electron": "^32.0.0",
+    "electron-store": "^10.0.0",
+    "axios": "^1.7.0",
+    "ws": "^8.18.0",
+    "node-fetch": "^3.3.2",
+    "uuid": "^10.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "electron-builder": "^25.0.0",
+    "electron-reloader": "^1.2.3"
+  },
+  "build": {
+    "appId": "com.neurosovereign.enterprise.v5",
+    "productName": "NeuroSovereign Enterprise",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis",
+        "arch": ["x64"]
+      ],
+      "artifactName": "NeuroSovereign-Enterprise-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        { "target": "dmg",
+          "arch": ["x64", "arm64"]
+      },
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "linux": {
+      "category": "Office",
+      "target": [
+        { "target": "AppImage",
+          "arch": ["x64"]
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+# Neuro-Sovereign Enterprise v5 - local orchestration
+# Usage: docker compose up --build
+services:
+  nse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nse:5.0.0
+    container_name: nse
+    ports:
+      - "8000:8000"
+    volumes:
+      - nse_state:/app/state
+    env_file:
+      - .env.template
+    environment:
+      # Reach the redis service by hostname inside the compose network
+      REDIS_URL: redis://redis:6379
+      NSE_DATA_DIR: /app/state
+    restart: unless-stopped
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "-m", "neurosovereign.cli", "status"]
+      interval: 30s
+      timeout: 15s
+      start_period: 30s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: nse-redis
+    restart: unless-stopped
+
+volumes:
+  nse_state:

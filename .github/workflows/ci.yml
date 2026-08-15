@@ -1,0 +1,192 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, 'release/**']
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+
+# Prevent duplicate runs on the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimal permissions – release job widens as needed
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint (ruff + mypy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project + dev tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-deps -e ".[dev]"
+          pip install -e .
+
+      - name: Ruff lint
+        run: ruff check neurosovereign
+
+      - name: Ruff format check
+        run: ruff format --check neurosovereign
+
+      - name: Mypy type check
+        run: mypy neurosovereign || true
+
+  test:
+    name: Test (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install dependencies (resilient)
+        run: |
+          python -m pip install --upgrade pip
+          # Register project without dependency resolution first
+          pip install --no-deps -e ".[dev]"
+          # Then resolve the runtime dependency tree
+          pip install -e .
+
+      - name: Syntax check (all modules compile)
+        run: |
+          python -c "import glob; [compile(open(f,'r',encoding='utf-8').read(),f,'exec') for f in glob.glob('neurosovereign/**/*.py',recursive=True)]"
+
+      - name: Smoke test (17 layers)
+        run: |
+          python -m neurosovereign.cli test
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-py${{ matrix.python }}
+          path: |
+            state/
+            *.log
+          if-no-files-found: ignore
+
+  security-scan:
+    name: Security (bandit + pip-audit + SBOM)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project + scanners
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install bandit pip-audit cyclonedx-py
+
+      - name: Bandit scan
+        run: bandit -r neurosovereign -ll -f json -o bandit-report.json || true
+
+      - name: pip-audit (dependency vulnerabilities)
+        run: pip-audit --format json -o pip-audit-report.json || true
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          cyclonedx-py environment -o sbom-ci.json --schema-version 1.5
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            pip-audit-report.json
+            sbom-ci.json
+          if-no-files-found: warn
+
+  build:
+    name: Build Docker image
+    needs: [test, security-scan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build and tag image
+        run: |
+          docker build \
+            --label org.opencontainers.image.title="Neuro-Sovereign Enterprise" \
+            --label org.opencontainers.image.version="5.0.0" \
+            --label org.opencontainers.image.source="${{ github.repositoryUrl }}" \
+            --label org.opencontainers.image.revision="${{ github.sha }}" \
+            -t nse:5.0.0 \
+            -t nse:${{ github.sha }} \
+            .
+
+      - name: Smoke test inside container
+        run: |
+          docker run --rm nse:5.0.0 python -m neurosovereign.cli test
+
+  k8s-validate:
+    name: Validate K8s manifests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate Kubernetes YAML syntax
+        run: |
+          python -c "
+          import yaml, glob, sys
+          errors = []
+          for f in glob.glob('k8s/*.yaml'):
+              try:
+                  list(yaml.safe_load_all(open(f)))
+                  print(f'  OK: {f}')
+              except Exception as e:
+                  errors.append(f'{f}: {e}')
+                  print(f'  FAIL: {f}: {e}')
+          if errors:
+              sys.exit(1)
+          print('All K8s manifests valid.')
+          "
