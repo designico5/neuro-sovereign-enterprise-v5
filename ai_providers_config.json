@@ -86,21 +86,68 @@
         "audit_required": false,
         "data_sovereignty": "full_local_control"
       }
+    },
+    "openai": {
+      "enabled": true,
+      "type": "cloud",
+      "api_endpoint": "https://api.openai.com/v1",
+      "model_families": [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-4-turbo",
+        "gpt-3.5-turbo",
+        "gpt-4",
+        "gpt-4-turbo",
+        "gpt-3.5-turbo",
+        "gpt-4-vision-preview",
+        "gpt-4o",
+        "o1-preview",
+        "o1-mini"
+      ],
+      "authentication": {
+        "type": "api_key",
+        "env_variable": "OPENAI_API_KEY"
+      },
+      "features": {
+        "streaming": true,
+        "function_calling": true,
+        "vision": true,
+        "code_generation": true,
+        "context_window": 128000,
+        "multimodal": true,
+        "json_mode": true
+      },
+      "use_cases": [
+        "enterprise",
+        "production",
+        "high_complexity",
+        "multimodal",
+        "vision_tasks",
+        "reasoning"
+      ],
+      "cost_efficiency": "medium",
+      "speed": "fast",
+      "neuro_sovereign_integration": {
+        "compliance_layer": "14_governance",
+        "audit_required": true,
+        "data_sovereignty": "cloud_with_compliance"
+      }
     }
   },
   "provider_selection_strategy": {
     "default_provider": "ollama_local",
     "fallback_provider": "opencodezen",
+    "enterprise_provider": "openai",
     "selection_criteria": {
       "privacy_sensitivity": {
         "high": "ollama_local",
         "medium": "ollama_local",
-        "low": "opencodezen"
+        "low": "openai"
       },
       "task_complexity": {
         "simple": "ollama_local",
         "medium": "ollama_local",
-        "complex": "opencodezen"
+        "complex": "openai"
       },
       "availability": {
         "offline": "ollama_local",
@@ -108,7 +155,13 @@
       },
       "cost_preference": {
         "minimize_cost": "ollama_local",
-        "maximize_performance": "opencodezen"
+        "maximize_performance": "openai"
+      },
+      "task_type": {
+        "vision": "openai",
+        "multimodal": "openai",
+        "code_generation": "opencodezen",
+        "general": "ollama_local"
       }
     }
   },

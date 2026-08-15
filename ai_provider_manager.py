@@ -146,6 +146,19 @@ class AIProviderManager:
                 is_available = response.status_code == 200
                 response_time = response.elapsed.total_seconds() * 1000 if is_available else None
             
+            elif provider == "openai":
+                # Check if API key is configured
+                api_key = os.getenv(provider_config["env_variable"])
+                if not api_key:
+                    return {"available": False, "reason": "api_key_missing"}
+                
+                # Check API availability
+                response = requests.get(f"{provider_config['api_endpoint']}/models", 
+                                      headers={"Authorization": f"Bearer {api_key}"},
+                                      timeout=10)
+                is_available = response.status_code == 200
+                response_time = response.elapsed.total_seconds() * 1000 if is_available else None
+            
             else:
                 return {"available": False, "reason": "unknown_provider"}
             
@@ -190,6 +203,8 @@ class AIProviderManager:
             return self.call_ollama(provider_config, model, prompt, task_type)
         elif provider == "opencodezen":
             return self.call_opencodezen(provider_config, model, prompt, task_type)
+        elif provider == "openai":
+            return self.call_openai(provider_config, model, prompt, task_type)
         else:
             return {"success": False, "error": "unknown_provider"}
     
@@ -282,6 +297,64 @@ class AIProviderManager:
         cost_per_1k_tokens = 0.001  # $0.001 per 1K tokens
         return (tokens / 1000) * cost_per_1k_tokens
     
+    def call_openai(self, provider_config: Dict, model: str, prompt: str, task_type: str) -> Dict:
+        """Call OpenAI API"""
+        api_key = os.getenv(provider_config["env_variable"])
+        
+        if not api_key:
+            return {"success": False, "error": "API key not configured", "provider": "openai"}
+        
+        try:
+            response = requests.post(
+                f"{provider_config['api_endpoint']}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "stream": False
+                },
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                tokens_used = result.get("usage", {}).get("total_tokens", 0)
+                
+                # Calculate cost (simplified estimation)
+                cost = self.calculate_openai_cost(model, tokens_used)
+                
+                # Log request
+                self.log_provider_request("openai", model, task_type,
+                                        tokens_used, response.elapsed.total_seconds() * 1000,
+                                        True, cost)
+                
+                return {
+                    "success": True,
+                    "response": result["choices"][0]["message"]["content"],
+                    "model": model,
+                    "tokens_used": tokens_used,
+                    "cost_usd": cost,
+                    "provider": "openai"
+                }
+            else:
+                return {"success": False, "error": f"HTTP {response.status_code}", "provider": "openai"}
+                
+        except requests.exceptions.RequestException as e:
+            return {"success": False, "error": str(e), "provider": "openai"}
+    
+    def calculate_openai_cost(self, model: str, tokens: int) -> float:
+        """Calculate cost for OpenAI (simplified)"""
+        # Simplified cost calculation - actual pricing may vary
+        cost_per_1k_tokens = 0.002  # $0.002 per 1K tokens (approximate)
+        if "gpt-4" in model.lower():
+            cost_per_1k_tokens = 0.03  # Higher cost for GPT-4
+        elif "o1" in model.lower():
+            cost_per_1k_tokens = 0.05  # Higher cost for o1 models
+        return (tokens / 1000) * cost_per_1k_tokens
+    
     def log_provider_request(self, provider: str, model: str, task_type: str,
                            tokens_used: int, response_time_ms: float, 
                            success: bool, cost_usd: float):
@@ -307,12 +380,27 @@ class AIProviderManager:
         privacy_sensitivity = self.analyze_privacy_sensitivity(prompt)
         task_complexity = self.analyze_task_complexity(prompt)
         
-        # Select primary provider
-        primary_provider = self.select_provider(
-            task_type=task_type,
-            privacy_sensitivity=privacy_sensitivity,
-            task_complexity=task_complexity
-        )
+        # Check for task-specific provider selection
+        selection_criteria = self.config["provider_selection_strategy"].get("selection_criteria", {})
+        task_type_providers = selection_criteria.get("task_type", {})
+        
+        if task_type in task_type_providers:
+            preferred_provider = task_type_providers[task_type]
+            if preferred_provider in self.config["ai_providers"]:
+                primary_provider = preferred_provider
+            else:
+                primary_provider = self.select_provider(
+                    task_type=task_type,
+                    privacy_sensitivity=privacy_sensitivity,
+                    task_complexity=task_complexity
+                )
+        else:
+            # Select primary provider
+            primary_provider = self.select_provider(
+                task_type=task_type,
+                privacy_sensitivity=privacy_sensitivity,
+                task_complexity=task_complexity
+            )
         
         # Check primary provider health
         health = self.check_provider_health(primary_provider)
@@ -404,7 +492,7 @@ def main():
     
     # Test provider health
     print("Checking provider health...")
-    for provider in ["ollama_local", "opencodezen"]:
+    for provider in ["ollama_local", "opencodezen", "openai"]:
         health = manager.check_provider_health(provider)
         print(f"{provider}: {health}")
     

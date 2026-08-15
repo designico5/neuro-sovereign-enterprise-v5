@@ -4,7 +4,7 @@
 
 **Version**: 5.0-SYMBIOSIS  
 **Status**: Production Ready  
-**Providers**: OpenCodezen + Ollama Local
+**Providers**: OpenAI + OpenCodezen + Ollama Local
 
 ---
 
@@ -14,6 +14,7 @@ The Neuro-Sovereign Enterprise now supports multiple AI providers with intellige
 
 - **🏠 Ollama Local**: Privacy-focused, cost-free, offline-capable
 - **☁️ OpenCodezen**: Cloud-based, high-performance, scalable
+- **🔵 OpenAI**: Enterprise-grade, industry-standard, multimodal
 
 ---
 
@@ -29,10 +30,16 @@ bash setup_ollama.sh
 bash setup_opencodezen.sh
 ```
 
-### 3. Update Environment Variables
+### 3. Configure OpenAI (Enterprise AI)
+```bash
+bash setup_openai.sh
+```
+
+### 4. Update Environment Variables
 ```bash
 # Add to .env file
 OPENCODEZEN_API_KEY=your_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 OLLAMA_HOST=http://localhost:11434
 ```
 
@@ -107,23 +114,57 @@ ollama pull codellama:7b
 
 ---
 
+## 🔵 OPENAI
+
+### Features
+- **✅ Industry Standard**: Most widely used AI platform
+- **✅ Multimodal**: Text, images, code
+- **✅ Advanced Models**: GPT-4o, o1, GPT-4-turbo
+- **✅ Function Calling**: Advanced AI capabilities
+- **✅ Enterprise**: 99.9% uptime, compliance
+
+### Setup
+1. Sign up at https://platform.openai.com
+2. Create API key in dashboard
+3. Add to .env: `OPENAI_API_KEY=your_key`
+4. Test connection with setup script
+
+### Available Models
+- **gpt-4o** - Latest, multimodal, 128K context
+- **gpt-4o-mini** - Fast, cost-effective
+- **gpt-4-turbo** - High performance
+- **gpt-3.5-turbo** - Fast, efficient
+- **o1-preview** - Advanced reasoning
+- **o1-mini** - Compact reasoning
+
+### Use Cases
+- Enterprise production workloads
+- Vision and multimodal tasks
+- Advanced reasoning with o1 models
+- Code generation at scale
+- Complex problem solving
+
+---
+
 ## 🧠 INTELLIGENT ROUTING
 
 ### Automatic Provider Selection
 
 The system automatically selects the best provider based on:
 
-| Criteria | Ollama Local | OpenCodezen |
-|----------|---------------|--------------|
-| **Privacy High** | ✅ Primary | ❌ |
-| **Privacy Medium** | ✅ Primary | ✅ Fallback |
-| **Privacy Low** | ✅ Primary | ✅ Primary |
-| **Simple Tasks** | ✅ Primary | ❌ |
-| **Medium Tasks** | ✅ Primary | ✅ Fallback |
-| **Complex Tasks** | ❌ | ✅ Primary |
-| **Offline** | ✅ Only | ❌ |
-| **Cost Minimize** | ✅ Primary | ❌ |
-| **Performance Max** | ❌ | ✅ Primary |
+| Criteria | Ollama Local | OpenCodezen | OpenAI |
+|----------|---------------|--------------|---------|
+| **Privacy High** | ✅ Primary | ❌ | ❌ |
+| **Privacy Medium** | ✅ Primary | ✅ Fallback | ❌ |
+| **Privacy Low** | ✅ Primary | ✅ Fallback | ✅ Primary |
+| **Simple Tasks** | ✅ Primary | ❌ | ❌ |
+| **Medium Tasks** | ✅ Primary | ✅ Fallback | ❌ |
+| **Complex Tasks** | ❌ | ✅ Fallback | ✅ Primary |
+| **Vision Tasks** | ❌ | ❌ | ✅ Primary |
+| **Multimodal** | ❌ | ❌ | ✅ Primary |
+| **Offline** | ✅ Only | ❌ | ❌ |
+| **Cost Minimize** | ✅ Primary | ❌ | ❌ |
+| **Performance Max** | ❌ | ✅ Fallback | ✅ Primary |
 
 ### Usage Example
 ```python
@@ -195,7 +236,7 @@ print(json.dumps(stats, indent=2))
 ### Metrics Tracked
 - Request count per provider
 - Average response time
-- Cost tracking (OpenCodezen)
+- Cost tracking (OpenCodezen, OpenAI)
 - Success rate
 - Error rate
 
@@ -212,6 +253,7 @@ print(json.dumps(stats, indent=2))
 ### Privacy Protection
 - **Ollama Local**: Full data sovereignty
 - **OpenCodezen**: GDPR-compliant cloud processing
+- **OpenAI**: Enterprise compliance and data handling
 - **Provider Selection**: Privacy-aware automatic routing
 - **Data Classification**: Automatic sensitivity detection
 
@@ -278,11 +320,22 @@ curl -H "Authorization: Bearer $OPENCODEZEN_API_KEY" \
   https://api.opencodezen.com/v1/models
 ```
 
+### OpenAI Issues
+```bash
+# Verify API key
+echo $OPENAI_API_KEY
+
+# Test connection
+curl -H "Authorization: Bearer $OPENAI_API_KEY" \
+  https://api.openai.com/v1/models
+```
+
 ### Routing Issues
 ```python
 # Check provider health
 manager.check_provider_health("ollama_local")
 manager.check_provider_health("opencodezen")
+manager.check_provider_health("openai")
 
 # Test specific provider
 manager.call_provider("ollama_local", "llama3.1:8b", "test")
@@ -292,14 +345,16 @@ manager.call_provider("ollama_local", "llama3.1:8b", "test")
 
 ## 📈 PERFORMANCE COMPARISON
 
-| Metric | Ollama Local | OpenCodezen |
-|--------|---------------|--------------|
-| **Latency** | 50-200ms | 100-500ms |
-| **Cost** | Free | Pay-per-token |
-| **Privacy** | 100% Local | Cloud Processing |
-| **Reliability** | Depends on Hardware | 99.9% Uptime |
-| **Scalability** | Limited | Unlimited |
-| **Models** | Open-source | Proprietary |
+| Metric | Ollama Local | OpenCodezen | OpenAI |
+|--------|---------------|--------------|---------|
+| **Latency** | 50-200ms | 100-500ms | 200-800ms |
+| **Cost** | Free | Pay-per-token | Pay-per-token |
+| **Privacy** | 100% Local | Cloud Processing | Cloud Processing |
+| **Reliability** | Depends on Hardware | 99.9% Uptime | 99.9% Uptime |
+| **Scalability** | Limited | Unlimited | Unlimited |
+| **Models** | Open-source | Proprietary | Proprietary |
+| **Multimodal** | ❌ | ❌ | ✅ |
+| **Vision** | ❌ | ❌ | ✅ |
 
 ---
 
@@ -310,6 +365,16 @@ manager.call_provider("ollama_local", "llama3.1:8b", "test")
 {
   "provider_selection_strategy": {
     "default_provider": "ollama_local",
+    "fallback_provider": "opencodezen"
+  }
+}
+```
+
+### OpenAI-First Setup
+```json
+{
+  "provider_selection_strategy": {
+    "default_provider": "openai",
     "fallback_provider": "opencodezen"
   }
 }
