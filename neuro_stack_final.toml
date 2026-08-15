@@ -88,6 +88,13 @@ thought_visualizer = true
 ethical_reasoning = true
 symbiosis_optimization = true
 human_ai_collaboration = true
+ai_providers_config = "./ai_providers_config.json"
+ai_provider_manager = "./ai_provider_manager.py"
+default_provider = "ollama_local"
+fallback_provider = "opencodezen"
+intelligent_routing = true
+privacy_aware_routing = true
+cost_optimization = true
 
 [verification_proof] # Ebene 8
 enabled = true

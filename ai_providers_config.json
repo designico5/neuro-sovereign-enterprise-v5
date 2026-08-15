@@ -1,0 +1,155 @@
+{
+  "version": "5.0-symbiosis",
+  "ai_providers": {
+    "opencodezen": {
+      "enabled": true,
+      "type": "cloud",
+      "api_endpoint": "https://api.opencodezen.com/v1",
+      "model_families": [
+        "opencodezen-7b",
+        "opencodezen-13b",
+        "opencodezen-34b",
+        "opencodezen-70b"
+      ],
+      "authentication": {
+        "type": "api_key",
+        "env_variable": "OPENCODEZEN_API_KEY"
+      },
+      "features": {
+        "streaming": true,
+        "function_calling": true,
+        "vision": false,
+        "code_generation": true,
+        "context_window": 128000
+      },
+      "use_cases": [
+        "general_purpose",
+        "code_assistance",
+        "reasoning",
+        "analysis"
+      ],
+      "cost_efficiency": "high",
+      "speed": "fast",
+      "neuro_sovereign_integration": {
+        "compliance_layer": "14_governance",
+        "audit_required": true,
+        "data_sovereignty": "cloud_with_gdpr_compliance"
+      }
+    },
+    "ollama_local": {
+      "enabled": true,
+      "type": "local",
+      "api_endpoint": "http://localhost:11434",
+      "model_families": [
+        "llama3.1",
+        "llama3.1:8b",
+        "llama3.1:70b",
+        "mistral",
+        "mistral:7b",
+        "mixtral",
+        "mixtral:8x7b",
+        "codellama",
+        "codellama:7b",
+        "qwen2.5",
+        "qwen2.5:7b",
+        "gemma2",
+        "gemma2:9b"
+      ],
+      "authentication": {
+        "type": "none",
+        "local_only": true
+      },
+      "features": {
+        "streaming": true,
+        "function_calling": true,
+        "vision": false,
+        "code_generation": true,
+        "context_window": 128000,
+        "offline_capability": true
+      },
+      "use_cases": [
+        "privacy_sensitive",
+        "development",
+        "local_testing",
+        "offline_operations"
+      ],
+      "cost_efficiency": "free",
+      "speed": "medium",
+      "hardware_requirements": {
+        "ram_minimum": "8GB",
+        "ram_recommended": "16GB",
+        "gpu_required": false,
+        "gpu_recommended": true
+      },
+      "neuro_sovereign_integration": {
+        "compliance_layer": "none",
+        "audit_required": false,
+        "data_sovereignty": "full_local_control"
+      }
+    }
+  },
+  "provider_selection_strategy": {
+    "default_provider": "ollama_local",
+    "fallback_provider": "opencodezen",
+    "selection_criteria": {
+      "privacy_sensitivity": {
+        "high": "ollama_local",
+        "medium": "ollama_local",
+        "low": "opencodezen"
+      },
+      "task_complexity": {
+        "simple": "ollama_local",
+        "medium": "ollama_local",
+        "complex": "opencodezen"
+      },
+      "availability": {
+        "offline": "ollama_local",
+        "online": "auto"
+      },
+      "cost_preference": {
+        "minimize_cost": "ollama_local",
+        "maximize_performance": "opencodezen"
+      }
+    }
+  },
+  "load_balancing": {
+    "enabled": true,
+    "strategy": "round_robin",
+    "health_check_interval": 60,
+    "fallback_on_failure": true
+  },
+  "caching": {
+    "enabled": true,
+    "cache_type": "redis",
+    "cache_duration": 3600,
+    "max_cache_size": "1GB"
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": [
+      "request_count",
+      "response_time",
+      "token_usage",
+      "error_rate",
+      "cost_tracking"
+    ],
+    "alerts": {
+      "high_error_rate": true,
+      "slow_response_time": true,
+      "cost_threshold": true
+    }
+  },
+  "neuro_sovereign_features": {
+    "identity_embedding": true,
+    "compliance_checking": true,
+    "audit_trail": true,
+    "blockchain_verification": true,
+    "dynamic_routing": true
+  },
+  "integration_layers": {
+    "cognition_layer": "9_cognition",
+    "orchestration_layer": "10_orchestration",
+    "verification_layer": "8_verification",
+    "governance_layer": "14_governance"
+  }
+}
