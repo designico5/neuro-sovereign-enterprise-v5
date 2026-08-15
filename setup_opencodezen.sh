@@ -54,7 +54,7 @@ test_opencodezen() {
     if command -v curl &> /dev/null; then
         response=$(curl -s -w "\n%{http_code}" \
             -H "Authorization: Bearer $OPENCODEZEN_API_KEY" \
-            "https://api.opencodezen.com/v1/models" 2>/dev/null)
+            "https://opencode.ai/zen/v1/models" 2>/dev/null)
         
         http_code=$(echo "$response" | tail -n1)
         
@@ -72,12 +72,14 @@ test_opencodezen() {
 get_opencodezen_info() {
     info "OpenCodezen Information:"
     echo ""
-    echo "API Endpoint: https://api.opencodezen.com/v1"
+    echo "API Endpoint: https://opencode.ai/zen/v1"
     echo "Available Models:"
-    echo "  - opencodezen-7b (Fast, efficient)"
-    echo "  - opencodezen-13b (Balanced)"
-    echo "  - opencodezen-34b (Powerful)"
-    echo "  - opencodezen-70b (Maximum performance)"
+    echo "  - gpt-5.6-sol (Latest, highest performance)"
+    echo "  - gpt-5.6-terra (Advanced reasoning)"
+    echo "  - claude-opus-5 (Premium Claude)"
+    echo "  - claude-sonnet-5 (Balanced Claude)"
+    echo "  - gemini-3.7-flash (Fast multimodal)"
+    echo "  - deepseek-v4-pro (Advanced coding)"
     echo ""
     echo "Features:"
     echo "  - Streaming responses"
@@ -95,7 +97,7 @@ get_opencodezen_info() {
 setup_account() {
     info "OpenCodezen Account Setup:"
     echo ""
-    echo "1. Visit: https://opencodezen.com"
+    echo "1. Visit: https://opencode.ai"
     echo "2. Sign up for an account"
     echo "3. Generate API key in dashboard"
     echo "4. Add API key to .env file:"

@@ -4,12 +4,15 @@
     "opencodezen": {
       "enabled": true,
       "type": "cloud",
-      "api_endpoint": "https://api.opencodezen.com/v1",
+      "api_endpoint": "https://opencode.ai/zen/v1",
       "model_families": [
-        "opencodezen-7b",
-        "opencodezen-13b",
-        "opencodezen-34b",
-        "opencodezen-70b"
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.5",
+        "claude-opus-5",
+        "claude-sonnet-5",
+        "gemini-3.7-flash",
+        "deepseek-v4-pro"
       ],
       "authentication": {
         "type": "api_key",
