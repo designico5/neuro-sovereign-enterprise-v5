@@ -1,0 +1,43 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-08-15T18:53:48Z",
+    "tools": [
+      {
+        "vendor": "Neuro-Sovereign",
+        "name": "Security Automation",
+        "version": "5.0-SYMBIOSIS"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "verus",
+      "version": "v1.0.0",
+      "purl": "pkg:github/verus-lang/verus@v1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library", 
+      "name": "self_improving_coding_agent",
+      "version": "v2.1.0",
+      "purl": "pkg:github/MaximeRobeyns/self_improving_coding_agent@v2.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  ]
+}

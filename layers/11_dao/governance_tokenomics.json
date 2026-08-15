@@ -1,0 +1,63 @@
+{
+  "dao_name": "NeuroSovereignDAO",
+  "token_symbol": "NSOV",
+  "voting_mechanism": "QUADRATIC_VOTING_WITH_AI_OVERSIGHT",
+  "quorum_threshold": 0.30,
+  "proposal_types": [
+    {
+      "type": "STRATEGIC_PIVOT",
+      "required_majority": 0.75,
+      "voting_period_days": 14,
+      "eligible_voters": ["HUMANS", "AI_AGENTS_LEVEL_9_PLUS"],
+      "ai_vote_cap": 0.02,
+      "human_fallback": true
+    },
+    {
+      "type": "BUDGET_ALLOCATION",
+      "required_majority": 0.60,
+      "voting_period_days": 7,
+      "eligible_voters": ["TOKEN_HOLDERS"],
+      "ai_vote_cap": 0.01,
+      "require_human_majority": true
+    },
+    {
+      "type": "ETHOS_AMENDMENT",
+      "required_majority": 0.95,
+      "voting_period_days": 30,
+      "eligible_voters": ["FOUNDERS", "AI_CORE", "COMMUNITY_COUNCIL"],
+      "ai_vote_cap": 0.00,
+      "human_only": true,
+      "constitutional_lock": true
+    },
+    {
+      "type": "EMERGENCY_ACTIONS",
+      "required_majority": 0.80,
+      "voting_period_days": 0.5,
+      "eligible_voters": ["SAFETY_COUNCIL", "AI_CORE"],
+      "ai_vote_cap": 0.05,
+      "time_lock_hours": 24
+    }
+  ],
+  "ai_voting_rights": {
+    "enabled": true,
+    "condition": "AGENT_MUST_HAVE_PROVEN_SAFETY_RECORD_10000_HOURS",
+    "weight_cap": 0.02,
+    "human_oversight_required": true,
+    "transparency_required": true,
+    "audit_trail": true,
+    "safety_validation": "FORMAL_VERIFICATION"
+  },
+  "safety_mechanisms": {
+    "human_veto_power": true,
+    "ai_transparency_threshold": 0.95,
+    "explanation_requirement": "mandatory",
+    "ethical_review_board": true,
+    "emergency_shutdown": true
+  },
+  "participation_incentives": {
+    "voting_rewards": true,
+    "delegation_allowed": true,
+    "liquid_democracy": true,
+    "reputation_system": true
+  }
+}

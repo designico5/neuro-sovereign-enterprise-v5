@@ -1,0 +1,99 @@
+{
+  "version": "5.0-symbiosis",
+  "strategy": "symbiotic_multi_jurisdiction",
+  "philosophy": "Fair contribution + regulatory compliance + mutual benefit",
+  "jurisdictions": [
+    {
+      "id": "AR",
+      "name": "Argentina",
+      "type": "AI_INNOVATION_PARTNER",
+      "laws": ["Non-Human-Corp-Act-2026"],
+      "tax_rate": 0.05,
+      "data_sovereignty": "full_autonomy",
+      "symbiosis_score": 0.85,
+      "innovation_contributions": "R&D_local",
+      "priority": 1,
+      "benefits": ["AI_research_collaboration", "tech_transfer", "education_programs"]
+    },
+    {
+      "id": "EU",
+      "name": "European Union",
+      "type": "REGULATORY_LEADER",
+      "laws": ["EU_AI_ACT_HIGH_RISK", "GDPR"],
+      "tax_rate": 0.25,
+      "data_sovereignty": "strict_localization",
+      "symbiosis_score": 0.90,
+      "compliance_contributions": "full_transparency",
+      "priority": 1,
+      "benefits": ["market_access", "regulatory_certification", "consumer_trust"]
+    },
+    {
+      "id": "US",
+      "name": "United States",
+      "type": "INNOVATION_HUB",
+      "laws": ["NIST_AI_RMF", "STATE_LAWS"],
+      "tax_rate": 0.21,
+      "data_sovereignty": "federal_compliance",
+      "symbiosis_score": 0.82,
+      "innovation_contributions": "tech_development",
+      "priority": 2,
+      "benefits": ["VC_access", "talent_pool", "infrastructure"]
+    },
+    {
+      "id": "SG",
+      "name": "Singapore",
+      "type": "FINANCIAL_BRIDGE",
+      "laws": ["PDPA", "AI_GOVERNANCE_FRAMEWORK"],
+      "tax_rate": 0.17,
+      "data_sovereignty": "adequacy_status",
+      "symbiosis_score": 0.88,
+      "financial_contributions": "regional_hq",
+      "priority": 2,
+      "benefits": ["gateway_to_asia", "financial_services", "trade_agreements"]
+    },
+    {
+      "id": "CH",
+      "name": "Switzerland",
+      "type": "NEUTRAL_GROUND",
+      "laws": ["FADP", "AI_ETHICS_GUIDELINES"],
+      "tax_rate": 0.20,
+      "data_sovereignty": "privacy_by_design",
+      "symbiosis_score": 0.86,
+      "diplomatic_contributions": "neutrality",
+      "priority": 3,
+      "benefits": ["diplomatic_channels", "dispute_resolution", "international_standards"]
+    }
+  ],
+  "routing_rules": [
+    "IF data_type == 'PII_EU' THEN route_to = 'EU' AND comply_with_gdpr",
+    "IF task_type == 'HIGH_RISK_AI' THEN compliance_check = 'EU_AI_ACT' AND human_oversight = true",
+    "IF symbiosis_score > 0.85 THEN prefer_jurisdiction = 'HIGH_SYMBIOSIS'",
+    "IF local_benefit > global_optimization THEN support_local_economy = true",
+    "IF latency_budget < 10ms THEN prefer = 'EDGE' AND maintain_regulatory_compliance",
+    "IF innovation_contribution_possible THEN invest_in_local_research = true",
+    "IF tax_rate_variance > 0.10 THEN apply_fair_tax_distribution_model"
+  ],
+  "symbiosis_principles": [
+    "Mutual benefit over unilateral advantage",
+    "Fair tax contribution in all jurisdictions",
+    "Regulatory compliance as baseline requirement",
+    "Local community investment and development",
+    "Knowledge sharing and technology transfer",
+    "Environmental sustainability alignment",
+    "Ethical AI standards harmonization"
+  ],
+  "fair_tax_model": {
+    "base_contribution": 0.15,
+    "innovation_bonus": 0.05,
+    "compliance_bonus": 0.03,
+    "community_investment": 0.02,
+    "total_min_rate": 0.20,
+    "max_optimization": 0.10
+  },
+  "compliance_matrix": {
+    "data_protection": "EU_GDPR_compliant",
+    "ai_safety": "NIST_AI_RMF_aligned",
+    "financial_regulation": "international_standards",
+    "environmental": "carbon_neutral_commitment"
+  }
+}

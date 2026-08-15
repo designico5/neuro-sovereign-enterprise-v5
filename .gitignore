@@ -1,0 +1,82 @@
+# Environment Variables
+.env
+.env.local
+.env.production
+
+# Sensitive Files
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account.json
+private_key.pem
+secret.txt
+
+# Logs
+*.log
+install_log_*.txt
+logs/
+*.logs
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+
+# Rust
+target/
+Cargo.lock
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary Files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.zed/
+
+# Lock Files
+*.lock
+.lock
+.lockfile
+
+# Security Scans
+security_scan_*.json
+vulnerability_report_*.md
+
+# Backup Files
+*.bak
+*.backup
+*_backup/
+
+# Temp State
+/tmp/
+temp/
+tmp/

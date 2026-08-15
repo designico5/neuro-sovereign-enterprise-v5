@@ -1,0 +1,27 @@
+version: "4.0"
+frameworks:
+  - name: "EU_AI_ACT"
+    status: "ENFORCING"
+    deadline: "2026-08-02"
+    risk_tier: "HIGH"
+    obligations:
+      - "Transparency_Labeling"
+      - "Human_Oversight_Protocol"
+      - "Conformity_Assessment_Auto"
+      - "Incident_Reporting_Realtime"
+  - name: "NIST_AI_RMF"
+    status: "ADOPTED"
+    functions:
+      - "GOVERN"
+      - "MAP"
+      - "MEASURE"
+      - "MANAGE"
+  - name: "ISO_42001"
+    status: "CERTIFIED"
+    scope: "AI_Management_System"
+
+auto_audit:
+  enabled: true
+  frequency: "CONTINUOUS"
+  output_format: "BLOCKCHAIN_ANCHOR"
+  retention_years: 10

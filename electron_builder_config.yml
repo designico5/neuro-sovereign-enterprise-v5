@@ -1,0 +1,158 @@
+# NEURO-SOVEREIGN ENTERPRISE - ELECTRON BUILDER CONFIGURATION
+# VERSION: 5.0-SYMBIOSIS
+# PURPOSE: Cross-platform desktop application building with code signing
+
+appId: com.neurosovereign.enterprise
+productName: NeuroSovereignEnterprise
+copyright: © 2026 Neuro-Sovereign Enterprise
+directories:
+  buildResources: build
+  output: dist
+
+# ==============================================================================
+# NEURO-SOVEREIGN INTEGRATION
+# ==============================================================================
+neuroSovereign:
+  identityEmbedding: true
+  complianceCheck: true
+  blockchainVerification: true
+  symbiosisOptimization: true
+
+# ==============================================================================
+# SECURITY CONFIGURATION
+# ==============================================================================
+security:
+  enableSecurity: true
+  hardenedRuntime: true
+  sandboxEnabled: true
+  libraryValidation: true
+
+# ==============================================================================
+# MACOS CONFIGURATION
+# ==============================================================================
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+    - zip
+    - pkg
+  icon: build/icon.icns
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  gatekeeperAssess: false
+  hardenedRuntime: true
+  provisioningProfile: build/embedded.provisionprofile
+  
+  # Code Signing Configuration
+  identity: "${MAC_CERTIFICATE_ID}"  # Will be replaced by build script
+  notarize: true
+  notarizeOptions:
+    teamId: "${MAC_TEAM_ID}"
+  
+  # Package Requirements
+  extendInfo:
+    - NSCameraUsageDescription: "Neuro-Sovereign Enterprise requires camera access for AI interaction features"
+    - NSMicrophoneUsageDescription: "Neuro-Sovereign Enterprise requires microphone access for voice commands"
+    - LSMinimumSystemVersion: "10.15.0"
+
+# ==============================================================================
+# WINDOWS CONFIGURATION  
+# ==============================================================================
+win:
+  target:
+    - nsis
+    - msi
+    - appx
+  icon: build/icon.ico
+  artifactName: \${productName}-\${version}-\${arch}.\${ext}
+  
+  # Code Signing Configuration
+  certificateFile: "${WINDOWS_CERT_PATH}"
+  certificatePassword: "${WINDOWS_CERT_PASSWORD}"
+  signingHashAlgorithms:
+    - sha256
+  
+  # Timestamp Server Configuration
+  timestampUrl: "http://timestamp.digicert.com"
+  
+  # Windows Smart Screen Bypass
+  publisherName: "Neuro-Sovereign Enterprise"
+  verifiedPublisher: true
+  
+  # Package Configuration
+  fileAssociations:
+    - ext: nse
+      name: Neuro-Sovereign Enterprise
+      description: Neuro-Sovereign Enterprise File
+      role: Editor
+
+# ==============================================================================
+# LINUX CONFIGURATION
+# ==============================================================================
+linux:
+  category: Development
+  target:
+    - AppImage
+    - deb
+    - rpm
+    - snap
+  icon: build/icons
+  maintainer: "Neuro-Sovereign Enterprise <contact@neurosovereign.ai>"
+  vendor: "Neuro-Sovereign Enterprise"
+  
+  # GPG Signing Configuration
+  packageManager: apt  # apt, yum, pacman
+  
+  # Desktop Integration
+  synopsis: "Neuro-Sovereign Enterprise - AI-Powered Symbiotic Operations"
+  description: |
+    A secure, symbiotic AI enterprise platform with 17-layer architecture
+    for global operations with regulatory compliance and ethical AI standards.
+
+# ==============================================================================
+# COMMON CONFIGURATION
+# ==============================================================================
+files:
+  - "!**/.gitignore"
+  - "!**/.env"
+  - "!**/node_modules/**/*"
+  - "!**/dist/**/*"
+  - "!**/build/**/*"
+  - "!**/*.md"
+  - "!**/*.json"
+  - "!**/*.py"
+  - "!**/*.sh"
+
+extraResources:
+  - from: "neuro_stack_final.toml"
+    to: "neuro_stack_final.toml"
+  - from: "layers/"
+    to: "layers/"
+  - from: "state/"
+    to: "state/"
+
+# ==============================================================================
+# BUILD OPTIMIZATION
+# ==============================================================================
+compression: maximum
+asar: true
+asarUnpack:
+  - resources/layer_17_legal  # Keep smart contracts accessible
+
+# ==============================================================================
+# PUBLISHING
+# ==============================================================================
+publish:
+  provider: github
+  owner: neuro-sovereign
+  repo: neuro-sovereign-enterprise
+  releaseType: release
+
+# ==============================================================================
+# SYMBIOSIS METRICS
+# ==============================================================================
+symbiosisMetrics:
+  enabled: true
+  trackBuildTime: true
+  trackSecurityMetrics: true
+  trackComplianceMetrics: true

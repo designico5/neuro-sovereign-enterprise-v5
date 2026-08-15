@@ -1,0 +1,9 @@
+[submodule "verus"]
+	path = verus
+	url = https://github.com/verus-lang/verus.git
+[submodule "self_improving_coding_agent"]
+	path = self_improving_coding_agent
+	url = https://github.com/MaximeRobeyns/self_improving_coding_agent.git
+[submodule "science-codeevolve"]
+	path = science-codeevolve
+	url = https://github.com/inter-co/science-codeevolve.git

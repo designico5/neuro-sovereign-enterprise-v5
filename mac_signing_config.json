@@ -1,0 +1,136 @@
+{
+  "platform": "macos",
+  "signing_configuration": {
+    "apple_developer": {
+      "team_id": "YOUR_TEAM_ID",
+      "developer_id": "YOUR_DEVELOPER_ID_EMAIL",
+      "certificate_id": "Developer ID Application: YOUR_NAME (TEAM_ID)"
+    },
+    "certificates": {
+      "developer_id_application": {
+        "file": "certificates/developer_id_application.p12",
+        "password_env": "MAC_CERT_PASSWORD",
+        "team_id": "YOUR_TEAM_ID"
+      },
+      "developer_id_installer": {
+        "file": "certificates/developer_id_installer.p12", 
+        "password_env": "MAC_INSTALLER_CERT_PASSWORD",
+        "team_id": "YOUR_TEAM_ID"
+      }
+    },
+    "notarization": {
+      "enabled": true,
+      "apple_id_env": "APPLE_ID",
+      "password_env": "APPLE_APP_SPECIFIC_PASSWORD",
+      "provider": "YOUR_TEAM_ID"
+    },
+    "entitlements": {
+      "com.apple.security.cs.allow-jit": true,
+      "com.apple.security.cs.allow-unsigned-executable-memory": false,
+      "com.apple.security.cs.disable-library-validation": false,
+      "com.apple.security.cs.allow-dyld-environment-variables": false,
+      "com.apple.security.cs.disable-executable-page-protection": false,
+      "com.apple.security.device.audio-input": false,
+      "com.apple.security.device.camera": false,
+      "com.apple.security.network.client": true,
+      "com.apple.security.network.server": false,
+      "com.apple.security.files.user-selected.read-write": true,
+      "com.apple.security.files.downloads.read-write": true
+    },
+    "hardened_runtime": {
+      "enabled": true,
+      "options": [
+        "runtime",
+        "library-validation",
+        "kill-injected"
+      ]
+    },
+    "app_sandbox": {
+      "enabled": true,
+      "inherit": false
+    },
+    "provisioning_profiles": {
+      "development": "provisioning/profiles/development.provisionprofile",
+      "distribution": "provisioning/profiles/distribution.provisionprofile"
+    }
+  },
+  "signing_process": {
+    "pre_signing": {
+      "verify_build": true,
+      "check_dependencies": true,
+      "security_scan": true
+    },
+    "signing_steps": [
+      {
+        "tool": "codesign",
+        "target": "application_bundle",
+        "options": [
+          "--force",
+          "--sign",
+          "--entitlements",
+          "--options=runtime",
+          "--timestamp"
+        ]
+      },
+      {
+        "tool": "codesign", 
+        "target": "all_binaries",
+        "options": ["--force", "--sign", "--timestamp"]
+      },
+      {
+        "tool": "productsign",
+        "target": "installer_package",
+        "options": ["--sign"]
+      }
+    ],
+    "post_signing": {
+      "notarize": true,
+      "staple": true,
+      "verify_signature": true,
+      "blockchain_anchor": true
+    }
+  },
+  "neuro_sovereign_features": {
+    "identity_embedding": true,
+    "compliance_check": true,
+    "audit_trail": true,
+    "blockchain_verification": true,
+    "dynamic_entitlements": true
+  },
+  "security_hardening": {
+    "compiler_flags": [
+      "-fstack-protector-strong",
+      "-D_FORTIFY_SOURCE=2",
+      "-Wformat",
+      "-Wformat-security",
+      "-fPIE",
+      "-pie"
+    ],
+    "linker_flags": [
+      "-Wl,-z,relro",
+      "-Wl,-z,now"
+    ],
+    "runtime_protections": {
+      "ASLR": true,
+      "Stack Canary": true,
+      "PIE": true,
+      "RELRO": true
+    }
+  },
+  "build_frameworks": {
+    "electron": {
+      "supported": true,
+      "package_manager": "electron-builder",
+      "configuration": "electron-builder.yml"
+    },
+    "native_macos": {
+      "supported": true,
+      "build_system": "xcodebuild",
+      "project_type": "app"
+    },
+    "cross_platform": {
+      "supported": true,
+      "frameworks": ["Flutter", "React Native", "Qt"]
+    }
+  }
+}
