@@ -86,7 +86,7 @@ jobs:
 
       - name: Upload test artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-py${{ matrix.python }}
           path: |
@@ -129,7 +129,7 @@ jobs:
           cyclonedx-py environment -o sbom-ci.json --schema-version 1.5
 
       - name: Upload security artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-reports
           path: |
