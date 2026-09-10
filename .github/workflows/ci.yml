@@ -40,13 +40,13 @@ jobs:
           pip install -e .
 
       - name: Ruff lint
-        run: ruff check neurosovereign
+        run: ruff check 01_CORE/neurosovereign
 
       - name: Ruff format check
-        run: ruff format --check neurosovereign
+        run: ruff format --check 01_CORE/neurosovereign
 
       - name: Mypy type check
-        run: mypy neurosovereign || true
+        run: mypy 01_CORE/neurosovereign || true
 
   test:
     name: Test (Python ${{ matrix.python }})
@@ -119,14 +119,14 @@ jobs:
           pip install bandit pip-audit cyclonedx-py
 
       - name: Bandit scan
-        run: bandit -r neurosovereign -ll -f json -o bandit-report.json || true
+        run: bandit -r 01_CORE/neurosovereign -ll -f json -o bandit-report.json || true
 
       - name: pip-audit (dependency vulnerabilities)
         run: pip-audit --format json -o pip-audit-report.json || true
 
       - name: Generate CycloneDX SBOM
         run: |
-          cyclonedx-py environment -o sbom-ci.json --schema-version 1.5
+          cyclonedx-py environment -o sbom-ci.json --spec-version 1.5
 
       - name: Upload security artifacts
         uses: actions/upload-artifact@v4
