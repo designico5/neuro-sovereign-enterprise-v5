@@ -123,3 +123,4 @@ _consolidate_out.txt
 !_nexus_collapse_plan.json
 _nexus_gitignore.py
 _nexus_gitignore_fix.py
+!_nexus_e2e_verify.py
