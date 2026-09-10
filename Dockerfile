@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Project metadata first (keeps the dependency-resolution layer cacheable)
 COPY pyproject.toml README.md ./
-COPY neurosovereign ./neurosovereign
+COPY 01_CORE/neurosovereign ./01_CORE/neurosovereign
 
 # Editable install pulls in the full runtime dependency tree from pyproject.toml
 RUN python -m pip install --upgrade pip && pip install -e . --no-cache
@@ -52,8 +52,8 @@ RUN groupadd --gid 1000 nse \
 # Installed site-packages from builder (deps + editable-install finder)
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
-# Application source at the same /app path so the editable install resolves
-COPY neurosovereign ./neurosovereign
+# Application source at 01_CORE so the editable install (pyproject where=01_CORE) resolves
+COPY 01_CORE/neurosovereign ./01_CORE/neurosovereign
 
 # Persistent state directory, owned by the non-root user
 RUN mkdir -p /app/state && chown -R 1000:1000 /app

@@ -81,7 +81,21 @@ h2{font-size:11px;letter-spacing:.16em;color:var(--dim);margin-bottom:10px;font-
   font-size:12px;color:#ffd;max-width:420px;text-align:center;display:none;pointer-events:auto;z-index:10}
 #stat{position:absolute;top:14px;left:16px;font-size:10px;color:var(--dim);
   letter-spacing:.06em;pointer-events:none;z-index:6}
-@media(max-width:1080px){#lay,#met,#phz,#gnm,#fcs{display:none}}
+/* Narrow / preview viewport: stack panels as a scrollable column (never hide content) */
+@media(max-width:1080px){
+  #stat{display:none}
+  #ui{overflow:auto;display:flex;flex-direction:column;gap:14px;
+     padding:70px 14px 16px;pointer-events:auto}
+  .panel{position:relative;left:auto!important;right:auto!important;
+     top:auto!important;bottom:auto!important;transform:none!important;
+     width:auto!important;margin:0;max-width:560px}
+  #hdr{order:-1;margin-bottom:2px}
+  #fcs{display:none}
+}
+@media(max-width:520px){
+  #met,#gnm,#phz,#lay{font-size:12px}
+  .lr .r{display:none}
+}
 </style>
 </head>
 <body>

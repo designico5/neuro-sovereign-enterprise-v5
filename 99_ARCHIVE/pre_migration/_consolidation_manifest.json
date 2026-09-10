@@ -1,0 +1,187 @@
+{
+  "phase": "KOLLAPS/consolidation",
+  "stamp": "20260910_102642",
+  "method": "NexusTorus 369/Spark2",
+  "invariants": [
+    "no_delete_or_overwrite_during_migration"
+  ],
+  "active_source": {
+    "python_package": "01_CORE/neurosovereign (pyproject where=['01_CORE'])",
+    "stack_config": "01_CORE/neuro_stack_final.toml"
+  },
+  "kept_in_root": [
+    "README.md",
+    "requirements.txt",
+    "pyproject.toml",
+    "package.json",
+    ".env.template",
+    ".gitignore",
+    ".gitmodules",
+    "NEXUS_TORUS_STRUCTURE.md"
+  ],
+  "moves": [
+    {
+      "item": "neurosovereign",
+      "to": "99_ARCHIVE/pre_migration/neurosovereign",
+      "result": "[moved] neurosovereign -> pre_migration/neurosovereign  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "neuro_stack_final.toml",
+      "to": "99_ARCHIVE/pre_migration/neuro_stack_final.toml",
+      "result": "[moved] neuro_stack_final.toml -> pre_migration/neuro_stack_final.toml  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "k8s",
+      "to": "99_ARCHIVE/pre_migration/k8s",
+      "result": "[moved] k8s -> pre_migration/k8s  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "terraform",
+      "to": "99_ARCHIVE/pre_migration/terraform",
+      "result": "[moved] terraform -> pre_migration/terraform  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "layers",
+      "to": "99_ARCHIVE/pre_migration/layers",
+      "result": "[moved] layers -> pre_migration/layers  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "ai_providers_config.json",
+      "to": "99_ARCHIVE/pre_migration/ai_providers_config.json",
+      "result": "[moved] ai_providers_config.json -> pre_migration/ai_providers_config.json  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "ai_provider_manager.py",
+      "to": "99_ARCHIVE/pre_migration/ai_provider_manager.py",
+      "result": "[moved] ai_provider_manager.py -> pre_migration/ai_provider_manager.py  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "AI_PROVIDERS_README.md",
+      "to": "99_ARCHIVE/pre_migration/AI_PROVIDERS_README.md",
+      "result": "[moved] AI_PROVIDERS_README.md -> pre_migration/AI_PROVIDERS_README.md  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "SECURITY_ANALYSIS.md",
+      "to": "99_ARCHIVE/pre_migration/SECURITY_ANALYSIS.md",
+      "result": "[moved] SECURITY_ANALYSIS.md -> pre_migration/SECURITY_ANALYSIS.md  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "SECURITY_ANALYSIS_V5_OPTIMIZED.md",
+      "to": "99_ARCHIVE/pre_migration/SECURITY_ANALYSIS_V5_OPTIMIZED.md",
+      "result": "[moved] SECURITY_ANALYSIS_V5_OPTIMIZED.md -> pre_migration/SECURITY_ANALYSIS_V5_OPTIMIZED.md  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "supply_chain_security.json",
+      "to": "99_ARCHIVE/pre_migration/supply_chain_security.json",
+      "result": "[moved] supply_chain_security.json -> pre_migration/supply_chain_security.json  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "supply_chain_security.sh",
+      "to": "99_ARCHIVE/pre_migration/supply_chain_security.sh",
+      "result": "[moved] supply_chain_security.sh -> pre_migration/supply_chain_security.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "cross_platform_signing.py",
+      "to": "99_ARCHIVE/pre_migration/cross_platform_signing.py",
+      "result": "[moved] cross_platform_signing.py -> pre_migration/cross_platform_signing.py  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "code_signing_infrastructure.json",
+      "to": "99_ARCHIVE/pre_migration/code_signing_infrastructure.json",
+      "result": "[moved] code_signing_infrastructure.json -> pre_migration/code_signing_infrastructure.json  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "windows_signing_config.json",
+      "to": "99_ARCHIVE/pre_migration/windows_signing_config.json",
+      "result": "[moved] windows_signing_config.json -> pre_migration/windows_signing_config.json  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "mac_signing_config.json",
+      "to": "99_ARCHIVE/pre_migration/mac_signing_config.json",
+      "result": "[moved] mac_signing_config.json -> pre_migration/mac_signing_config.json  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "CODE_SIGNING_README.md",
+      "to": "99_ARCHIVE/pre_migration/CODE_SIGNING_README.md",
+      "result": "[moved] CODE_SIGNING_README.md -> pre_migration/CODE_SIGNING_README.md  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "certificate_management.sh",
+      "to": "99_ARCHIVE/pre_migration/certificate_management.sh",
+      "result": "[moved] certificate_management.sh -> pre_migration/certificate_management.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "state",
+      "to": "99_ARCHIVE/pre_migration/state",
+      "result": "[moved] state -> pre_migration/state  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "deploy_optimized_system.sh",
+      "to": "99_ARCHIVE/pre_migration/deploy_optimized_system.sh",
+      "result": "[moved] deploy_optimized_system.sh -> pre_migration/deploy_optimized_system.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "DEPLOYMENT_SUMMARY.md",
+      "to": "99_ARCHIVE/pre_migration/DEPLOYMENT_SUMMARY.md",
+      "result": "[moved] DEPLOYMENT_SUMMARY.md -> pre_migration/DEPLOYMENT_SUMMARY.md  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "VOICE_INTERFACE_README.md",
+      "to": "99_ARCHIVE/pre_migration/VOICE_INTERFACE_README.md",
+      "result": "[moved] VOICE_INTERFACE_README.md -> pre_migration/VOICE_INTERFACE_README.md  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "setup_voice_interface.sh",
+      "to": "99_ARCHIVE/pre_migration/setup_voice_interface.sh",
+      "result": "[moved] setup_voice_interface.sh -> pre_migration/setup_voice_interface.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "build_desktop_app.py",
+      "to": "99_ARCHIVE/pre_migration/build_desktop_app.py",
+      "result": "[moved] build_desktop_app.py -> pre_migration/build_desktop_app.py  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "electron_builder_config.yml",
+      "to": "99_ARCHIVE/pre_migration/electron_builder_config.yml",
+      "result": "[moved] electron_builder_config.yml -> pre_migration/electron_builder_config.yml  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "setup_ollama.sh",
+      "to": "99_ARCHIVE/pre_migration/setup_ollama.sh",
+      "result": "[moved] setup_ollama.sh -> pre_migration/setup_ollama.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "setup_openai.sh",
+      "to": "99_ARCHIVE/pre_migration/setup_openai.sh",
+      "result": "[moved] setup_openai.sh -> pre_migration/setup_openai.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "setup_opencodezen.sh",
+      "to": "99_ARCHIVE/pre_migration/setup_opencodezen.sh",
+      "result": "[moved] setup_opencodezen.sh -> pre_migration/setup_opencodezen.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "setup_secure_credentials.sh",
+      "to": "99_ARCHIVE/pre_migration/setup_secure_credentials.sh",
+      "result": "[moved] setup_secure_credentials.sh -> pre_migration/setup_secure_credentials.sh  (legacy root replaced by 5-layer spatial structure)"
+    },
+    {
+      "item": "verus",
+      "to": "(root, git-submodule)",
+      "result": "kept",
+      "submodule": true
+    },
+    {
+      "item": "self_improving_coding_agent",
+      "to": "(root, git-submodule)",
+      "result": "kept",
+      "submodule": true
+    },
+    {
+      "item": "science-codeevolve",
+      "to": "(root, git-submodule)",
+      "result": "kept",
+      "submodule": true
+    }
+  ]
+}
