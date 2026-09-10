@@ -34,7 +34,8 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    NSE_DATA_DIR=/app/state
+    NSE_DATA_DIR=/app/state \
+    PYTHONPATH=/app/01_CORE
 
 WORKDIR /app
 
