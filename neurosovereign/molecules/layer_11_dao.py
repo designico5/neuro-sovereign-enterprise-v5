@@ -70,7 +70,11 @@ class DAOGovernanceEngine(BaseNSELayer):
         self.db_path = os.path.join(self.root, "governance.sqlite3")
         self._conn: Optional[sqlite3.Connection] = None
         self.voters: Dict[str, Voter] = {}
-        self.emergency_authorized: set = {"root", "founder"}
+        self.emergency_authorized: set = {
+            a.strip()
+            for a in os.getenv("NSE_DAO_EMERGENCY_AUTHORIZED", "root,founder").split(",")
+            if a.strip()
+        }
         self.constitutional_articles: Dict[str, str] = {
             "A1": "NSE Platform sovereignty belongs to the token+reputation holders.",
             "A2": "Emergency shutdown requires 2/3 yes + at least 3 emergency signers.",
@@ -98,6 +102,10 @@ class DAOGovernanceEngine(BaseNSELayer):
             self._conn.execute(table)
         self._conn.commit()
         self._reload_voters()
+        _seed = {v.strip(): int(float(r)) for v, r in (p.split(":", 1) for p in os.getenv("NSE_DAO_SEED_VOTERS", "root:100").split(",") if ":" in p)}
+        for _vid, _rep in _seed.items():
+            if _vid not in self.voters:
+                self.add_voter(_vid, reputation=_rep)
         self.add_extra("voters_count", len(self.voters))
         self.add_extra("proposals_count", self._count("proposals"))
         self.add_extra("constitutional_articles", list(self.constitutional_articles.keys()))

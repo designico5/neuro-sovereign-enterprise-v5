@@ -148,7 +148,7 @@ class StrategyMarketEngine(BaseNSELayer):
             (strategy_id,),
         ).fetchone()
         backtest, sharpe, dd = (strat[1], strat[2], strat[3]) if strat else (0.0, 1.0, 0.0)
-        z = sharpe / math.sqrt(max(1.0, float(strat and strat[3] is not None and 0 or 1)))
+        # crowd-weighted net 35%, backtest 35%, risk-adjusted Sharpe 30%
         crowd_component = 0.35 * net  # crowd is 35%
         backtest_component = 0.35 * math.tanh(float(backtest) / 100.0)
         sharpe_component = 0.30 * min(1.0, max(0.0, float(sharpe) / 3.0))

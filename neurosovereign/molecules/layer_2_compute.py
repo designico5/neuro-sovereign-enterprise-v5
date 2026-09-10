@@ -141,7 +141,11 @@ class ComputeSiliconManager(BaseNSELayer):
         if policy == "minimum-watts":
             return min(eligible, key=lambda d: d.vram_gb)
         if policy == "jetson-orin-only":
-            j = [d for d in eligible if "orin" in d.model.lower() or "jetson" in d.model.lower()]
+            import os as _os
+            _targets = [t.strip() for t in _os.getenv("NSE_EDGE_DEVICE_SUBSTR", "orin,jetson").lower().split(",") if t.strip()]
+            j = [d for d in eligible if any(t in d.model.lower() for t in _targets)]
+            if not j:
+                logger.warning("[L02] edge tier requested, no %s device found; falling back to first eligible", _targets)
             return j[0] if j else eligible[0]
         return eligible[0]
 

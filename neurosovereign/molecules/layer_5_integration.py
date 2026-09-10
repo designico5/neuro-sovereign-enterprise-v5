@@ -174,7 +174,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             producer.flush(5)
             return {"ok": True, "topic": topic, "bytes": len(str(payload.get("value", "")))}
         except Exception as exc:
-            return {"ok": False, "simulated": True, "error": str(exc), "payload": payload}
+            raise RuntimeError(f"confluent_kafka unavailable for {con.config.name}: {exc}") from exc
 
     async def _mqtt(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         try:  # pragma: no cover - optional dep
@@ -184,7 +184,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             mqtt_pub.single(topic, payload=str(payload.get("value", "")), hostname=con.config.url)
             return {"ok": True, "topic": topic}
         except Exception as exc:
-            return {"ok": False, "simulated": True, "error": str(exc)}
+            raise RuntimeError(f"paho-mqtt unavailable for {con.config.name}: {exc}") from exc
 
     async def _jdbc(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         sql = payload.get("sql")
@@ -205,7 +205,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             conn.close()
             return {"ok": True, "rows": rows}
         except Exception as exc:
-            return {"ok": False, "simulated": True, "sql": sql, "error": str(exc)}
+            raise RuntimeError(f"jaydebeapi unavailable for {con.config.name}: {exc}") from exc
 
     async def _sftp(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         action = payload.get("action", "list")
@@ -231,7 +231,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             result["ok"] = True
             return result
         except Exception as exc:
-            return {"ok": False, "simulated": True, "action": action, "error": str(exc)}
+            raise RuntimeError(f"connector backend unavailable for {con.config.name}: {exc}") from exc
 
     async def _mainframe(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         action = payload.get("action", "connect")
@@ -245,7 +245,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             result["ok"] = True
             return result
         except Exception as exc:
-            return {"ok": False, "simulated": True, "action": action, "error": str(exc)}
+            raise RuntimeError(f"connector backend unavailable for {con.config.name}: {exc}") from exc
 
     # ------------------------------------------------------------ auth util
     def _auth_header(self, con: Connector) -> Optional[str]:

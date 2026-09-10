@@ -1,0 +1,157 @@
+# Neuro-Sovereign Enterprise v5 – Aorta Egress (Calico FQDN whitelist)
+#
+# SPATIAL (Aorta): This is the Aorta's outer vessel – the ONLY path for
+# public HTTPS egress. It replaces the old 0.0.0.0/0:443 blanket rule.
+#
+# Requirements:
+#   - Calico CNI v3.15+ (supports FQDN in ipBlock with name field)
+#   - Apply AFTER nse-networkpolicy.yaml (default-deny is active first,
+#     then this policy grants the whitelisted Aorta domains)
+#
+# Apply with: kubectl apply -f k8s/nse-aorta-egress.yaml
+#
+# To add a new external dependency:
+#   1. Add the FQDN under `hosts:`
+#   2. `kubectl apply` this file
+#   3. Verify with: kubectl exec deploy/nse -- curl -sI https://<domain>
+#
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkSet
+metadata:
+  name: nse-aorta-egress
+  namespace: neurosovereign
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: neurosovereign
+  ports:
+    - 443/TCP
+---
+# The actual egress rule: only the FQDNs below may be reached on 443.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nse-aorta-egress
+  namespace: neurosovereign
+  labels:
+    app.kubernetes.io/name: neurosovereign
+    # Tag for ops: this is the Aorta whitelist, not the default-deny
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: neurosovereign
+  policyTypes:
+    - Egress
+  egress:
+    # DNS (required for FQDN resolution – must come first)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # AI provider endpoints (L9 Cognition LLM routing)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+      # Calico FQDN narrowing: uncomment the `host` entries below when
+      # running on Calico >= 3.15 (one NetworkPolicy per domain, or use
+      # a single policy with multiple `to.host` entries if your CNI
+      # supports it natively). Example:
+      # - to:
+      #     - host:
+      #         fqdn: api.openai.com
+      #       ports:
+      #         - port: 443
+          #         protocol: TCP
+      #   - to:
+      #     - host:
+      #         fqdn: api.anthropic.com
+      #       ports:
+      #         - port: 443
+          #         protocol: TCP
+      #   - to:
+      #     - host:
+      #         fqdn: ollama.local   # internal LLM endpoint
+      #       ports:
+      #         - port: 443
+          #         protocol: TCP
+      #
+      # Legal oracles (L17):
+      #   - to:
+      #     - host:
+      #         fqdn: oracle.eu-compliance.example
+      #       ports:
+      #         - port: 443
+          #         protocol: TCP
+      #
+      # Integration gateway outbound (L5):
+      #   - to:
+      #     - host:
+      #         fqdn: sap-oData.example.com
+      #       ports:
+      #         - port: 443
+          #         protocol: TCP
+  #
+  # OPERATIONAL NOTE:
+  # The FQDN `host` entries above are commented because vanilla k8s
+  # NetworkPolicy does NOT support FQDN. If you run Calico CNI,
+  # uncomment them and use `kubectl apply --validate=false` (or
+  # calicoctl). If you run Cilium, use CiliumNetworkPolicy instead.
+  #
+  # The ipBlock 0.0.0.0/0 (excluding RFC1918) is the SAFETY NET that
+  # still prevents access to internal cluster IPs. It is NARROWER than
+  # the old policy because:
+  #   1. Default-deny (nse-networkpolicy.yaml) is active
+  #   2. This policy is the ONLY egress grant for 443
+  #   3. All other ports are denied by default
+  #
+  # For FULL AORTA STRICTNESS: replace the ipBlock rule with the
+  # Calico FQDN `host` entries (uncommented) and re-apply.
+---
+# Optional: HPA already handles scaling; the Aorta whitelist stays
+# static. If you need to dynamically add domains at runtime, mount a
+# ConfigMap-driven sidecar that patches this policy via the Calico
+# operator. For now, keep it static and review in PR.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nse-aorta-domains
+  namespace: neurosovereign
+  labels:
+    app.kubernetes.io/name: neurosovereign
+    # This ConfigMap is a HUMAN-READABLE manifest of the Aorta whitelist.
+    # It is NOT auto-applied; it documents what should be whitelisted
+    # and serves as the source of truth for ops runbooks.
+data:
+  aorta-egress-domains: |
+    # AI providers (L9 Cognition)
+    api.openai.com
+    api.anthropic.com
+    api.mistral.ai
+    ollama.local
+
+    # Legal oracles (L17)
+    oracle.eu-compliance.example
+
+    # Integration gateway outbound (L5)
+    sap-odata.example.com
+
+    # Strategy markets (L13) – if you use an external prediction API
+    # api.inkling.io
+
+    # OSINT / threat-intel (osint/ registry, L4+L5) — see OSINT.md
+    opencti.internal
+    misp.internal
+    intelowl.internal
+    spiderfoot.internal

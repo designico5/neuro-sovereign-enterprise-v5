@@ -99,6 +99,20 @@ class GeoPoliticalRouter(BaseNSELayer):
         self.conflicts: List[str] = []
         self.geodb_provider: str = os.getenv("NSE_GEO_PROVIDER", "demo")
         self.preferred_jurisdiction: Jurisdiction = os.getenv("NSE_PREFERRED_JURISDICTION", "EU")
+        # Deterministic demo CIDR->country map. Overridable via NSE_GEO_DEMO_IP_MAP
+        # (JSON: {"192.168.0.0/16":"DE","10.0.0.0/8":"US"}). In production point
+        # NSE_GEO_PROVIDER at a real geo DB (MaxMind/IP2Location) instead.
+        _demo_raw = os.getenv("NSE_GEO_DEMO_IP_MAP", "").strip()
+        if _demo_raw:
+            self._demo_ip_map: List[Tuple[str, str]] = [
+                (cidr, cc) for cidr, cc in json.loads(_demo_raw).items()
+            ]
+        else:
+            self._demo_ip_map = list(self.DEMO_IP_MAP)
+        # The leading-octet heuristic GUESSES a country from one IP byte. It is
+        # unsafe and masks real gaps, so it is OFF by default. Enable explicitly
+        # for demo tooling only, via NSE_GEO_OCTET_HEURISTIC=1.
+        self._octet_heuristic: bool = os.getenv("NSE_GEO_OCTET_HEURISTIC", "0").lower() in {"1", "true", "yes"}
 
     async def _initialize(self) -> None:
         self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
@@ -242,12 +256,13 @@ class GeoPoliticalRouter(BaseNSELayer):
         except ValueError:
             return "UNKNOWN"
         country = None
-        for net_cidr, cc in self.DEMO_IP_MAP:
+        for net_cidr, cc in self._demo_ip_map:
             net = ipaddress.ip_network(net_cidr, strict=False)
             if addr in net:
                 country = cc
                 break
-        if country is None:  # try a quick heuristic based on leading bytes
+        if country is None and self._octet_heuristic:
+            # opt-in demo heuristic only; with the flag off, unmatched IPs stay UNKNOWN
             oct_a = int(str(addr).split(".")[0]) if addr.version == 4 else None
             if oct_a is not None:
                 if 40 <= oct_a <= 60:

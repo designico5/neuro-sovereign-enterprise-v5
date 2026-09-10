@@ -1,5 +1,18 @@
 # Neuro-Sovereign Enterprise v5 - Kubernetes manifest
 # Apply with: kubectl apply -f k8s/nse-deployment.yaml
+#
+# SPATIAL ARCHITECTURE (Nexus / Park / Aorta):
+#   - The layer/state dir /app/state is the PARK (shared, single source of truth
+#     for all 9 SQLite molecules). It MUST persist across pod restarts.
+#   - We therefore mount a PersistentVolumeClaim (RWX so both replicas share the
+#     same Park). Do NOT use emptyDir: a node drain would wipe identity anchors,
+#     DAO votes, compliance receipts and the legal multi-sig ledger.
+#
+#   - The static seed material (governance tokenomics, compliance framework,
+#     routing policy, charter .sol, identity anchor docs) now lives under
+#     assets/ in the repo and is baked into the image; at first boot it is
+#     migrated ONCE into the Park. After seeding, only the Park (this PVC)
+#     holds mutable state.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -17,6 +30,24 @@ metadata:
 data:
   NSE_ENVIRONMENT: production
   NSE_LOG_LEVEL: INFO
+---
+# PARK: shared persistent state for all molecules (single source of truth)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nse-state
+  namespace: neurosovereign
+  labels:
+    app.kubernetes.io/name: neurosovereign
+spec:
+  # Two replicas share the same Park -> needs a multi-attach capable class
+  # (NFS / CephFS / GCE-SSD with allowVolumeExpansion, or your CSI RWX driver).
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  # storageClassName: nse-rwx   # uncomment to pin an RWX storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -88,7 +119,8 @@ spec:
               mountPath: /app/state
       volumes:
         - name: state
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: nse-state
 ---
 apiVersion: v1
 kind: Service
