@@ -105,3 +105,21 @@ terraform/*.tfstate.*
 terraform/crash.log
 terraform/terraform.tfvars
 terraform/*.auto.tfvars
+
+# NEXUS TORUS - audit / scratch working files (not part of the deliverable)
+_audit_contracts.py
+_contract_audit.txt
+_inventory.txt
+_inventory2.txt
+_verify.txt
+_consolidate_out.txt
+
+# NEXUS TORUS - keep verification / consolidation / migration tooling
+!_nexus_verify_collapse.py
+!_nexus_consolidate.py
+!_nexus_fix_tooling.py
+!_nexus_migrate.py
+!_nexus_spatial_manifest.json
+!_nexus_collapse_plan.json
+_nexus_gitignore.py
+_nexus_gitignore_fix.py
