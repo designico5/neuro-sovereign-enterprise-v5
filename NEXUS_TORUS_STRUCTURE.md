@@ -1,40 +1,54 @@
 # NEXUS TORUS: NSE-v5 RAUMSTRUKTUR
 # Stand: 2026-09-10 · Methodik: 369/Spark² · Invariante: no_delete_or_overwrite
+# Status: KOLLAS-FAZIT (Phase 9 NEXUS PRIME abgeschlossen)
 
-> Diese Datei ist das Orchester der neuen Raumstruktur.
-> Alle Originalpfade bleiben erhalten (copy-only Invariante).
+> Diese Datei ist das Orchester der 5-Schicht-Raumstruktur.
+> Phase 9 (Kollaps) ist ausgeführt: alle Legacy-Root-Pfade sind konsolidiert,
+> die no-delete-Invariante bleibt intakt (git-Renames, keine Löschungen).
 
-## SCHICHT-MODUL-MAPPING
+## KOLLAPS-FAZIT (was passiert ist)
+
+| Schritt | Commit | Ergebnis |
+|---|---|---|
+| 5-Schicht-Struktur (copy-only) | `bd0d2b2` | 37 Mappings, 12 Root-Originale erhalten, INTEGRITY PASS |
+| Root-JSON-Fix (electron-builder) | `34a9083` | kaputte Klammer im `package.json` repariert (Build-Blocker) |
+| Kollaps-Konsolidierung | `b0fd901` | 30 Legacy-Root-Pfade → `99_ARCHIVE/pre_migration/` (69 Dateien, **100 % git-Renames**) |
+| relative Assets + HOWTO | `59f6836` | `base:"./"` — Dashboard portable, `file://`-Leerscreen-Fix |
+| gitignore + Verifikationstool | `8201062` | Scratch ignoriert, `_nexus_verify_collapse.py` beibehalten |
+
+**Nach dem Kollaps ist `01_CORE` die *einzige* build-aktive Quelle:**
+`pyproject.toml where=["01_CORE"]` ↔ `Dockerfile COPY 01_CORE/neurosovereign` ↔
+`ci.yml '01_CORE/neurosovereign/**/*.py'` — alle Verträge aufeinander abgestimmt.
+
+## SCHICHT-MODUL-MAPPING (finaler Zustand)
 
 ```
-  ⟁ 01_CORE ────────── neurosovereign/ (Python-Package)
-      │                neuro_stack_final.toml
-      │  (17 Layer = invarianter Kernel, nicht zu editieren außer durch Engine)
+  ⟁ 01_CORE ────────── neurosovereign/ (17-Layer-Python-Package, invarianter Kernel)
+      │                (neuro_stack_final.toml — Konsolidierung: nach pre_migration)
       │
   ⟂ 02_MEMBRANE ────── k8s/  terraform/  Dockerfile  docker-compose.yml
       │  (semi-permeable Grenze: IaC + Container)
       │
-  ◬ 03_SYNAPSE ─────── config/ (ehemals layers/)
-      │                ai_providers_config.json
-      │                ai_provider_manager.py
-      │  (autokatalytisches Netzwerk: Layer-Config + AI-Anbindungs-Präparate)
+  ◬ 03_SYNAPSE ─────── config/ (Layer-Config, ehem. layers/)
+      │                ai_providers_* (Präparate)
+      │  (autokatalytisches Netzwerk)
       │
-  ◉ 04_OBSERVER ─────── .github/
-      │                security/  signing/  state/
-      │  (Meta-Ebene: CI/CD + Security-Analyse + Code-Signing + Runtime-State)
+  ◉ 04_OBSERVER ────── .github/  security/  signing/  state/
+      │  (Meta-Ebene: CI/CD + Security + Signing + Runtime-State)
       │
-  ⏣ 05_OUTPUT ───────── deployment/  voice/  desktop/  setup/
+  ⏣ 05_OUTPUT ──────── deployment/  voice/  desktop/  setup/
       │  (manifestierte Realität: alles was ausgegeben wird)
       │
-  🕳️ 99_ARCHIVE ─────── science-codeevolve/  self_improving_coding_agent/  verus/
-                        _manifest.json
-      (Verdauungstrakt: stasierte Orphans — nicht gelöscht, nur gelagert)
+  🕳️ 99_ARCHIVE ────── science-codeevolve/  self_improving_coding_agent/  verus/
+                        pre_migration/  (30 Legacy-Root-Pfade, 69 Dateien)
+                        _manifest.json · _consolidation_manifest.json
+      (Verdauungstrakt: stasiert, nicht gelöscht)
 ```
 
 ## LAYER-17 → SCHICHT-MAPPING
 
-| NSE-Layer | Name | Neue Schicht | Ziel-Pfad |
-|-----------|------|--------------|-----------|
+| NSE-Layer | Name | Schicht | Ziel-Pfad |
+|-----------|------|---------|-----------|
 | 1 | Energy Feedback | 01_CORE | `01_CORE/neurosovereign/layers/layer_1_energy.py` |
 | 2 | Compute Silicon | 01_CORE | `01_CORE/neurosovereign/layers/layer_2_compute.py` |
 | 3 | Infrastructure IaC | 02_MEMBRANE | `02_MEMBRANE/terraform/` + `k8s/` |
@@ -55,14 +69,33 @@
 
 ## METABOLISMUS-KREISLÄUFE
 
-1. **Aufnahme** (02_MEMBRANE → 03_SYNAPSE): IaC-Changes werden als Layer-Config in `03_SYNAPSE/config/` ingested
-2. **Verdauung** (01_CORE): `neurosovereign/`-Package lädt die Config und initialisiert alle 17 Layer
-3. **Aktivierung** (04_OBSERVER): CI/CD-Pipeline und Security-Scans beobachten die Layer
-4. **Manifestierung** (05_OUTPUT): Deployment- und Voice-Scripts geben die Plattform als Artefakt aus
-5. **Archivierung** (99_ARCHIVE): Inaktive Module (verus, codeevolve, self_improving_coding_agent) werden stasiert
+1. **Aufnahme** (02_MEMBRANE → 03_SYNAPSE): IaC-Changes werden als Layer-Config ingested
+2. **Verdauung** (01_CORE): `neurosovereign/`-Package lädt die Config, initialisiert 17 Layer
+3. **Aktivierung** (04_OBSERVER): CI/CD + Security-Scans beobachten die Layer
+4. **Manifestierung** (05_OUTPUT): Deployment- und Voice-Scripts geben die Plattform aus
+5. **Archivierung** (99_ARCHIVE): Inaktive Module + alle 30 Legacy-Root-Pfade stasiert
 
-## INARIANTEN
+## INARIANTEN (Kollaps-Status)
 
-- `no_delete_or_overwrite_during_migration`: Alle Originalpfade bleiben im Root erhalten
-- `unknown_evidence_is_not_success`: Jedes Migration-Event ist im `_nexus_spatial_manifest.json` protokolliert
-- Die 17 Layer sind **invariant** (01_CORE) — sie werden nicht manuell editiert, sondern nur durch die Engine aktualisiert
+- `no_delete_or_overwrite_during_migration`:
+  **INTAKT** — Konsolidierung läuft über `_nexus_consolidate.py` als *git-Renames*
+  (keine Löschungen), alle 69 Dateien in `99_ARCHIVE/pre_migration/` erhalten.
+- `unknown_evidence_is_not_success`:
+  **Dokumentiert** — `_nexus_spatial_mapping.json` (37 Mappings) +
+  `_consolidation_manifest.json` (32 Einträge) + reproducible Verifikation
+  `_nexus_verify_collapse.py` (läuft: INTEGRITY PASS).
+- Die 17 Layer sind **invariant** (01_CORE) — nur durch die Engine aktualisiert.
+
+## LIVING DASHBOARD (Begleit-Artefakt)
+
+Zwei Generationen liegen in `dashboard/`:
+
+| Version | Pfad | Stack | Öffnen |
+|---------|------|-------|--------|
+| **Single-File-Fallback** | `dashboard/index.html` | Three.js + statische Panels (CDN-resilient) | `python -m http.server` |
+| **Max-Level** | `dashboard/web/` | Vite6 · React 19 · R3F v9 · Drei 10 · Framer 11 · Tailwind 4 · Three r169 | `npm run serve` / `npm run dev` |
+
+3D-Szene: 5-Schicht-Torus + 17-Layer-Golden-Angle-Kern + 520 Metabolismus-Partikel +
+Hexad-Ring + 5 Genie-Module + OrbitControls. HUD: Layer-Fokus, 7 Live-Metriken,
+369/Spark²-Phase, Genie-Multiplikatoren. ⚠️ Max-Level immer **via HTTP** öffnen
+(ES-Module + `file://`-CORS = leere Seite; `base:"./"` macht die Assets portabel).
