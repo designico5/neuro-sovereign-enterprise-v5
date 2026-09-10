@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NEXUS TORUS · Live 3D · NSE-v5</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --bg:#04060d;--panel:rgba(10,16,32,.7);--line:rgba(120,160,255,.18);
+  --txt:#cfe0ff;--dim:#7d8bb0;--core:#ffd08a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);
+  font-family:"Segoe UI",system-ui,sans-serif;color:var(--txt)}
+#scene-holder{position:fixed;inset:0;z-index:0}
+#ui{position:fixed;inset:0;z-index:5;pointer-events:none}
+#ui .panel{pointer-events:auto;position:absolute;
+  background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 40px rgba(0,0,0,.5),inset 0 0 30px rgba(80,120,255,.05)}
+#hdr{top:16px;left:50%;transform:translateX(-50%);padding:10px 22px;
+  display:flex;align-items:center;gap:14px;max-width:700px;pointer-events:auto}
+#hdr .glyph{font-size:26px;filter:drop-shadow(0 0 12px rgba(120,180,255,.6))}
+#hdr h1{font-size:15px;letter-spacing:.14em;font-weight:600;color:#eaf1ff}
+#hdr .sub{font-size:10.5px;color:var(--dim);letter-spacing:.08em;margin-top:2px}
+.live{display:flex;align-items:center;gap:6px;font-size:10px;color:#6bff8f;
+  letter-spacing:.1em;margin-left:8px;border-left:1px solid var(--line);padding-left:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#6bff8f;
+  box-shadow:0 0 10px #6bff8f;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+#lay{top:92px;left:16px;width:250px;padding:14px}
+#met{top:92px;right:16px;width:264px;padding:14px}
+#phz{bottom:132px;left:16px;width:250px;padding:12px 14px}
+#gnm{bottom:132px;right:16px;width:264px;padding:12px 14px}
+#fcs{bottom:16px;left:50%;transform:translateX(-50%);width:min(860px,62vw);
+  padding:13px 18px;display:flex;gap:18px;align-items:flex-start}
+#wrn{top:44%;left:50%;transform:translate(-50%,-50%);padding:14px 20px;
+  background:rgba(120,30,40,.7);border:1px solid rgba(255,90,106,.5);
+  font-size:12px;color:#ffd;max-width:420px;text-align:center;display:none;pointer-events:auto}
+h2{font-size:11px;letter-spacing:.16em;color:var(--dim);margin-bottom:10px;font-weight:600}
+.lr{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;
+  cursor:pointer;transition:.2s;border:1px solid transparent;margin-bottom:4px}
+.lr:hover{background:rgba(90,130,255,.08);border-color:var(--line)}
+.lr.on{background:rgba(90,130,255,.14);border-color:var(--line);
+  box-shadow:inset 0 0 18px rgba(90,130,255,.12)}
+.lr .g{font-size:18px;width:22px;text-align:center;flex:none}
+.lr .n{font-size:13px;font-weight:600;flex:1}
+.lr .r{font-size:10px;color:var(--dim)}
+.lr .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.mt{margin-bottom:11px}
+.mt .tp{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px}
+.mt .vl{font-variant-numeric:tabular-nums;font-weight:600;color:#eaf1ff}
+.mt .lb{color:var(--dim)}
+.brr{height:6px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden}
+.brr>i{display:block;height:100%;border-radius:4px;transition:width .5s}
+.tg{font-size:9.5px;color:var(--dim);margin-top:3px}
+.prc{display:flex;gap:8px}
+.pc{flex:1;text-align:center;padding:9px 0;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line);transition:.3s}
+.pc .n{font-size:20px;font-weight:700}
+.pc .h{font-size:9px;color:var(--dim);letter-spacing:.1em}
+.pc.on{background:rgba(90,140,255,.18);border-color:rgba(120,160,255,.5);
+  box-shadow:0 0 18px rgba(90,140,255,.35)}
+.spk{display:flex;gap:8px;margin-top:10px}
+.sk{flex:1;text-align:center;font-size:9.5px;padding:6px 0;border-radius:8px;
+  background:rgba(255,208,138,.06);border:1px solid rgba(255,208,138,.16);color:#ffe6bf}
+.sk b{display:block;font-size:13px;color:var(--core)}
+.gn{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:11.5px}
+.gn .mk{width:9px;height:9px;border-radius:50%;flex:none}
+.gn .nm{flex:1}
+.gn .mu{font-variant-numeric:tabular-nums;color:var(--core);font-weight:600}
+.fgs{font-size:30px;flex:none;margin-top:2px}
+.fbd{flex:1}
+.ftl{font-size:14px;font-weight:600;margin-bottom:4px}
+.frl{font-size:11px;color:var(--dim);margin-bottom:8px}
+.ftc{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:10px;padding:3px 8px;border-radius:20px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);color:#dfe8ff}
+@media(max-width:1080px){
+  #lay,#met,#phz,#gnm,#fcs{display:none}
+}
+</style>
+</head>
+<body>
+<div id="scene-holder"></div>
+<div id="ui"></div>
+<script type="text/babel" data-presets="env,react">
+const {useEffect,useRef,useState} = React;
+
+/* ── Domain data ── */
+const LAYERS=[
+  {id:0,glyph:"⟁",name:"01_CORE",color:0xffd08a,css:"#ffd08a",
+   role:"invarianter Kernel",
+   contains:["neurosovereign/ (17 Layer)","neuro_stack_final.toml"],
+   note:"Unveränderlich, aber strahlend. Endosymbiotic-Source."},
+  {id:1,glyph:"⟂",name:"02_MEMBRANE",color:0x4dd8ff,css:"#4dd8ff",
+   role:"semi-permeable Grenze",
+   contains:["k8s/","terraform/","Dockerfile","docker-compose.yml"],
+   note:"IaC + Container — Grenze zwischen Kernel und Außenwelt."},
+  {id:2,glyph:"◬",name:"03_SYNAPSE",color:0xff5ad0,css:"#ff5ad0",
+   role:"autokatalytisches Netzwerk",
+   contains:["config/ (Layer-Configs)","ai_providers_*"],
+   note:"Layer-Config + AI-Präparate — Konnektome des Systems."},
+  {id:3,glyph:"◉",name:"04_OBSERVER",color:0x6bff8f,css:"#6bff8f",
+   role:"Meta-Ebene",
+   contains:[".github/","security/","signing/","state/"],
+   note:"CI/CD + Security + Signing + State — das Auge des Organismus."},
+  {id:4,glyph:"⏣",name:"05_OUTPUT",color:0xff9a4d,css:"#ff9a4d",
+   role:"manifestierte Realität",
+   contains:["deployment/","voice/","desktop/","setup/"],
+   note:"Alles Sichtbare: Deployment, Voice, Desktop, Setup."},
+  {id:5,glyph:"ⓐ",name:"99_ARCHIVE",color:0x8b97ad,css:"#8b97ad",
+   role:"Verdauungstrakt",
+   contains:["science-codeevolve/","self_improving/","verus/","_manifest.json"],
+   note:"Stasierte Orphans — gelagert, nie gelöscht."},
+];
+const GENIE=[{n:"Tesla",m:2.0,c:"#ffd08a"},{n:"Ramanujan",m:2.5,c:"#4dd8ff"},
+            {n:"Gödel",m:2.2,c:"#ff5ad0"},{n:"Feynman",m:1.9,c:"#6bff8f"},
+            {n:"Jung",m:1.7,c:"#ff9a4d"}];
+const PHASES=[{n:"3",hz:"528 Hz"},{n:"6",hz:"639 Hz"},{n:"9",hz:"963 Hz"}];
+const SPARK=[{l:"L1",v:0.95},{l:"L2",v:1.425},{l:"L3",v:2.1375}];
+
+/* ── Live metrics ── */
+function makeMetrics(){
+  const t0=performance.now();
+  return { tick(){
+    const t=(performance.now()-t0)/1000, osc=(x,a)=>x+Math.sin(t*.6)*a;
+    return {genius:osc(.78,.02),auto:osc(.53,.03),iso:osc(.62,.04),
+            tunnel:osc(.41,.05),irre:osc(.88,.03),fractal:osc(.47,.04),
+            symbiosis:osc(.95,.01),layersUp:17,
+            phase:Math.floor(t/3)%3, spark:Math.floor(t/2)%3};
+  }};
+}
+
+/* ── Three.js scene ── */
+function initScene(holder,api){
+  if(typeof THREE==="undefined"){
+    const w=document.createElement("div");
+    w.id="wrn"; w.style.display="block";
+    w.textContent="⚠ Three.js CDN blockiert — UI läuft weiter, 3D-Szene nicht verfügbar.";
+    document.getElementById("ui").appendChild(w);
+    return;
+  }
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x04060d,0.016);
+  const cam=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,2000);
+  const rdr=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,2));
+  rdr.setSize(innerWidth,innerHeight);
+  holder.appendChild(rdr.domElement);
+
+  scene.add(new THREE.AmbientLight(0x223355,.6));
+  const key=new THREE.PointLight(0x88aaff,1.1,120); key.position.set(10,18,14); scene.add(key);
+  const coreLt=new THREE.PointLight(0xffd08a,1.4,40); scene.add(coreLt);
+  const world=new THREE.Group(); scene.add(world);
+
+  /* Starfield */
+  const sN=1400,sP=new Float32Array(sN*3);
+  for(let i=0;i<sN;i++){
+    const r=60+Math.random()*260, th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
+    sP[i*3]=r*Math.sin(ph)*Math.cos(th); sP[i*3+1]=r*Math.sin(ph)*Math.sin(th); sP[i*3+2]=r*Math.cos(ph);
+  }
+  const sG=new THREE.BufferGeometry(); sG.setAttribute("position",new THREE.BufferAttribute(sP,3));
+  scene.add(new THREE.Points(sG,new THREE.PointsMaterial({color:0x9fb8ff,size:.7,
+    transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false})));
+
+  /* Concentric layer rings */
+  const RD=[
+    {id:0,r:4.0, tilt:.15,op:.85},
+    {id:1,r:6.5, tilt:.35,op:.55},
+    {id:2,r:9.0, tilt:.55,op:.45},
+    {id:3,r:11.5,tilt:.75,op:.35},
+    {id:4,r:14.0,tilt:.95,op:.30},
+    {id:5,r:16.5,tilt:1.15,op:.20},
+  ];
+  const rings=[];
+  RD.forEach(rd=>{
+    const L=LAYERS[rd.id], g=new THREE.Group();
+    const ring=new THREE.Mesh(
+      new THREE.TorusGeometry(rd.r,.06,20,220),
+      new THREE.MeshBasicMaterial({color:L.color,transparent:true,opacity:rd.op})
+    );
+    ring.rotation.x=Math.PI/2+rd.tilt*.4; ring.userData.layerId=rd.id; ring.userData.isRing=true;
+    g.add(ring);
+    const glow=new THREE.Mesh(
+      new THREE.TorusGeometry(rd.r,.28,16,180),
+      new THREE.MeshBasicMaterial({color:L.color,transparent:true,opacity:rd.op*.22,
+        blending:THREE.AdditiveBlending,depthWrite:false})
+    );
+    glow.rotation.copy(ring.rotation); g.add(glow);
+    g.rotation.x=rd.tilt; world.add(g);
+    rings.push({g,ring,glow,baseOp:rd.op,id:rd.id});
+  });
+
+  /* Core: 17-layer golden-angle stack */
+  const core=new THREE.Group();
+  const cSp=new THREE.Mesh(new THREE.SphereGeometry(1.1,40,40),
+    new THREE.MeshStandardMaterial({color:0xffd08a,emissive:0xffb347,
+      emissiveIntensity:.9,roughness:.3,metalness:.4}));
+  cSp.userData.layerId=0; cSp.userData.isRing=true; core.add(cSp);
+  const cGl=new THREE.Mesh(new THREE.SphereGeometry(1.7,32,32),
+    new THREE.MeshBasicMaterial({color:0xffd08a,transparent:true,opacity:.18,
+      blending:THREE.AdditiveBlending,depthWrite:false}));
+  core.add(cGl);
+  const stack=[];
+  for(let i=0;i<17;i++){
+    const ang=i*2.399, rr=1.55+(i%3)*.12;
+    const p=new THREE.Mesh(new THREE.SphereGeometry(.085,12,12),
+      new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(.08+i*.012,.9,.62),
+        transparent:true,opacity:.95}));
+    p.position.set(Math.cos(ang)*rr,(i-8)*.16,Math.sin(ang)*rr);
+    p.userData.layerId=0; p.userData.isRing=true; stack.push(p); core.add(p);
+  }
+  world.add(core);
+
+  /* Metabolismus particles */
+  const MN=520, mG=new THREE.BufferGeometry();
+  const mP=new Float32Array(MN*3), mC=new Float32Array(MN*3);
+  const cA=new THREE.Color(0x4dd8ff),cB=new THREE.Color(0xff5ad0),cC=new THREE.Color(0xffd08a);
+  for(let i=0;i<MN;i++){
+    const t=i/MN, col=t<.5?cA.clone().lerp(cB,t*2):cB.clone().lerp(cC,(t-.5)*2);
+    mC[i*3]=col.r; mC[i*3+1]=col.g; mC[i*3+2]=col.b;
+  }
+  mG.setAttribute("position",new THREE.BufferAttribute(mP,3));
+  mG.setAttribute("color",new THREE.BufferAttribute(mC,3));
+  const meta=new THREE.Points(mG,new THREE.PointsMaterial({size:.16,vertexColors:true,
+    transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false}));
+  world.add(meta);
+
+  /* Hexad ring (6 nodes) */
+  const hexa=new THREE.Group();
+  for(let i=0;i<6;i++){
+    const a=i/6*Math.PI*2;
+    const m=new THREE.Mesh(new THREE.OctahedronGeometry(.28,0),
+      new THREE.MeshStandardMaterial({color:0x9fe0ff,emissive:0x2a6f9f,
+        emissiveIntensity:.6,roughness:.2,metalness:.5}));
+    m.position.set(Math.cos(a)*2.6,0,Math.sin(a)*2.6); hexa.add(m);
+  }
+  world.add(hexa);
+
+  /* Genie nodes (5) */
+  const gen=new THREE.Group();
+  GENIE.forEach((g,i)=>{
+    const a=i/5*Math.PI*2-Math.PI/2;
+    const m=new THREE.Mesh(new THREE.IcosahedronGeometry(.3,1),
+      new THREE.MeshStandardMaterial({color:new THREE.Color(g.c),
+        emissive:new THREE.Color(g.c),emissiveIntensity:.55,roughness:.3,metalness:.5}));
+    m.position.set(Math.cos(a)*3.4,1.2,Math.sin(a)*3.4); gen.add(m);
+  });
+  world.add(gen);
+
+  /* Camera control */
+  let theta=.6,phi=1.15,radius=18.5,dragging=false,px=0,py=0;
+  const dom=rdr.domElement;
+  function applyCam(){
+    phi=Math.max(.25,Math.min(Math.PI-.25,phi));
+    radius=Math.max(6,Math.min(60,radius));
+    cam.position.set(radius*Math.sin(phi)*Math.sin(theta),radius*Math.cos(phi),
+                     radius*Math.sin(phi)*Math.cos(theta));
+    cam.lookAt(0,0,0);
+  }
+  dom.addEventListener("pointerdown",e=>{dragging=true;px=e.clientX;py=e.clientY;dom.setPointerCapture(e.pointerId);});
+  dom.addEventListener("pointerup",e=>{dragging=false;try{dom.releasePointerCapture(e.pointerId)}catch(_){}});
+  dom.addEventListener("pointermove",e=>{if(!dragging)return;
+    theta-=(e.clientX-px)*.005; phi-=(e.clientY-py)*.005; px=e.clientX; py=e.clientY; applyCam();});
+  dom.addEventListener("wheel",e=>{e.preventDefault();radius*=(1+(e.deltaY>0?.08:-.08));applyCam();},{passive:false});
+  applyCam();
+  dom.style.cursor="grab";
+
+  /* Raycast picking */
+  const ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+  function pick(e){
+    const r=dom.getBoundingClientRect();
+    mouse.x=((e.clientX-r.left)/r.width)*2-1;
+    mouse.y=-((e.clientY-r.top)/r.height)*2+1;
+    ray.setFromCamera(mouse,cam);
+    const hits=ray.intersectObjects([cSp,cGl,...rings.map(x=>x.ring)],false);
+    if(hits.length) return hits[0].object.userData.layerId;
+    const s2=ray.intersectObjects(stack,false);
+    return s2.length?0:-1;
+  }
+  dom.addEventListener("click",e=>{const id=pick(e); if(id>=0&&api)api.focus(id);});
+
+  /* Animate */
+  let focused=-1;
+  const clock=new THREE.Clock();
+  (function animate(){
+    requestAnimationFrame(animate);
+    const dt=clock.getDelta(), t=clock.elapsedTime;
+    if(api) focused=api.getFocus();
+    world.rotation.y+=dt*.06;
+    hexa.rotation.y-=dt*.3;
+    gen.rotation.y+=dt*.18;
+    const pulse=1+Math.sin(t*2.2)*.06;
+    cSp.scale.setScalar(pulse); cGl.scale.setScalar(pulse*1.1);
+    coreLt.intensity=1.3+Math.sin(t*2.2)*.4;
+    stack.forEach((p,i)=>{p.scale.setScalar(1+Math.sin(t*2.2+i*.35)*.35);
+      p.position.y=(i-8)*.16*(1+Math.sin(t*1.1)*.08);});
+    for(let i=0;i<MN;i++){
+      const a=t*.25+i*.02, rr=5+Math.sin(t*.5+i*.35)*2.6;
+      mP[i*3]=Math.cos(a)*rr; mP[i*3+1]=Math.sin(a*.7+i*.13)*1.1; mP[i*3+2]=Math.sin(a)*rr;
+    }
+    mG.attributes.position.needsUpdate=true;
+    rings.forEach(rd=>{
+      const target=focused===rd.id?rd.baseOp+.4:rd.baseOp;
+      rd.ring.material.opacity+=(target-rd.ring.material.opacity)*.12;
+      rd.glow.material.opacity+=((focused===rd.id?.55:0)-rd.glow.material.opacity)*.08;
+      rd.g.scale.setScalar(1+Math.sin(t*1.5+rd.id)*.006);
+    });
+    rdr.render(scene,cam);
+  })();
+
+  addEventListener("resize",()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
+    rdr.setSize(innerWidth,innerHeight);});
+
+  api.focus=id=>{focused=id;};
+  api.getFocus=()=>focused;
+}
+
+/* ── React components ── */
+function LayerList({sel,onSel}){
+  return <div>
+    <h2>SCHICHTEN (5 + ARCHIV)</h2>
+    {LAYERS.map(l=>(
+      <div key={l.id} className={"lr"+(sel===l.id?" on":"")} onClick={()=>onSel(l.id)}>
+        <span className="g" style={{color:l.css}}>{l.glyph}</span>
+        <span className="n">{l.name}</span>
+        <span className="r">{l.role}</span>
+        <span className="sw" style={{background:l.css,boxShadow:"0 0 8px "+l.css}}/>
+      </div>
+    ))}
+  </div>;
+}
+function MetricBar({label,val,target,color,pct}){
+  return <div className="mt">
+    <div className="tp"><span className="lb">{label}</span>
+      <span className="vl">{val.toFixed(2)}</span></div>
+    <div className="brr"><i style={{width:Math.min(100,pct)+"%",
+      background:color,boxShadow:"0 0 8px "+color}}/></div>
+    {target?<div className="tg">Ziel ≥ {target}</div>:null}
+  </div>;
+}
+function MetricsPanel({m}){
+  return <div>
+    <h2>LIVE-METRIKEN</h2>
+    <MetricBar label="Genialitäts-Index" val={m.genius} target="0.75" color="#6bff8f"
+               pct={m.genius*100}/>
+    <MetricBar label="Autokatalyse (G4)"  val={m.auto}  target="0.50" color="#ffd08a"
+               pct={m.auto*100}/>
+    <MetricBar label="Isomorphie (G2)"    val={m.iso}  color="#4dd8ff" pct={m.iso*100}/>
+    <MetricBar label="Quanten-Tunnel (G3)"val={m.tunnel} color="#ff5ad0" pct={m.tunnel*100}/>
+    <MetricBar label="Irreduzibilität(G5)"val={m.irre} color="#ff9a4d" pct={m.irre*100}/>
+    <MetricBar label="Fraktale Komp.(G1)" val={m.fractal} color="#8b97ad" pct={m.fractal*100}/>
+    <div className="mt"><div className="tp">
+      <span className="lb">Symbiose-Score</span>
+      <span className="vl" style={{color:m.symbiosis>.9?"#6bff8f":"#ffd08a"}}>
+        {m.symbiosis.toFixed(2)}</span></div></div>
+    <div className="mt"><div className="tp">
+      <span className="lb">Layer-Health</span>
+      <span className="vl" style={{color:"#6bff8f"}}>{m.layersUp}/17</span></div></div>
+  </div>;
+}
+function PhasePanel({m}){
+  return <div>
+    <h2>369 / SPARK²</h2>
+    <div className="prc">
+      {PHASES.map((p,i)=>(
+        <div key={p.n} className={"pc"+(m.phase===i?" on":"")}>
+          <div className="n">{p.n}</div><div className="h">{p.hz}</div>
+        </div>
+      ))}
+    </div>
+    <div className="spk">
+      {SPARK.map((s,i)=>(
+        <div key={s.l} className="sk"
+             style={m.spark===i?{borderColor:"#ffd08a",boxShadow:"0 0 12px rgba(255,208,138,.4)"}:{}}>
+          <b>{s.v}</b>{s.l}
+        </div>
+      ))}
+    </div>
+  </div>;
+}
+function GeniePanel(){
+  return <div>
+    <h2>GENIE-MODULE (SPARK-BONUS)</h2>
+    {GENIE.map(g=>(
+      <div className="gn" key={g.n}>
+        <span className="mk" style={{background:g.c,boxShadow:"0 0 8px "+g.c}}/>
+        <span className="nm">{g.n}</span>
+        <span className="mu">×{g.m.toFixed(1)}</span>
+      </div>
+    ))}
+  </div>;
+}
+function FocusPanel({sel}){
+  const l=LAYERS[sel]; if(!l) return null;
+  return <div className="panel" id="fcs">
+    <span className="fgs" style={{color:l.css,textShadow:"0 0 16px "+l.css}}>{l.glyph}</span>
+    <div className="fbd">
+      <div className="ftl" style={{color:l.css}}>{l.name}</div>
+      <div className="frl">{l.role} · {l.note}</div>
+      <div className="ftc">{l.contains.map(c=>
+        <span className="tag" key={c} style={{borderColor:l.css+"55"}}>{c}</span>
+      )}</div>
+    </div>
+  </div>;
+}
+function Header(){
+  return <div className="panel" id="hdr">
+    <span className="glyph">⟁</span>
+    <div>
+      <h1>NEXUS TORUS · NSE-v5</h1>
+      <div className="sub">LEBENDIGE 3D-Raumstruktur · 17→5-Schicht-Komprimierung · 369/Spark²</div>
+    </div>
+    <div className="live"><span className="dot"/> LIVE</div>
+  </div>;
+}
+
+/* ── Mount ── */
+function Mount(){
+  const apiRef=useRef({focus:()=>{},getFocus:()=>-1});
+  const [sel,setSel]=useState(-1);
+  const engineRef=useRef(makeMetrics());
+  const [m,setM]=useState(engineRef.current.tick());
+
+  useEffect(()=>{
+    const h=document.getElementById("scene-holder");
+    if(h) initScene(h,apiRef.current);
+  },[]);
+
+  useEffect(()=>{
+    const id=setInterval(()=>setM(engineRef.current.tick()),160);
+    return()=>clearInterval(id);
+  },[]);
+
+  const selectLayer=id=>{setSel(id);apiRef.current.focus(id);};
+
+  return <div>
+    <Header/>
+    <div className="panel" id="lay"><LayerList sel={sel} onSel={selectLayer}/></div>
+    <div className="panel" id="met"><MetricsPanel m={m}/></div>
+    <div className="panel" id="phz"><PhasePanel m={m}/></div>
+    <div className="panel" id="gnm"><GeniePanel/></div>
+    {sel>=0?<FocusPanel sel={sel}/>:null}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("ui"))
+  .render(React.createElement(Mount));
+</script>
+</body>
+</html>
