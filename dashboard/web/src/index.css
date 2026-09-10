@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nexus-bg: #04060d;
+  --color-nexus-panel: rgba(10, 16, 32, 0.72);
+  --color-nexus-line: rgba(120, 160, 255, 0.18);
+  --color-nexus-txt: #cfe0ff;
+  --color-nexus-dim: #7d8bb0;
+  --color-nexus-core: #ffd08a;
+  --color-nexus-good: #6bff8f;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+:root {
+  --nexus-bg: #04060d;
+  --nexus-panel: rgba(10, 16, 32, 0.72);
+  --nexus-line: rgba(120, 160, 255, 0.18);
+  --nexus-txt: #cfe0ff;
+  --nexus-dim: #7d8bb0;
+  --nexus-core: #ffd08a;
+  --nexus-good: #6bff8f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root {
+  height: 100%; width: 100%;
+  overflow: hidden;
+  background: var(--nexus-bg);
+  color: var(--nexus-txt);
+  font-family: var(--font-sans);
+}
+
+/* ── Glass panel ── */
+.nx-panel {
+  background: var(--nexus-panel);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--nexus-line);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.55),
+    inset 0 0 30px rgba(80, 120, 255, 0.05);
+}
+
+/* ── Glow dot ── */
+.nx-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--nexus-good);
+  box-shadow: 0 0 10px var(--nexus-good);
+  animation: nx-pulse 1.4s infinite;
+}
+@keyframes nx-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.7); }
+}
+
+/* ── Layer row ── */
+.nx-layer {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px;
+  cursor: pointer; transition: all 0.18s;
+  border: 1px solid transparent; margin-bottom: 4px;
+  position: relative;
+}
+.nx-layer:hover { background: rgba(90, 130, 255, 0.09); border-color: var(--nexus-line); }
+.nx-layer.nx-on {
+  background: rgba(90, 130, 255, 0.15);
+  border-color: rgba(120, 160, 255, 0.45);
+  box-shadow: inset 0 0 20px rgba(90, 130, 255, 0.14);
+}
+
+/* ── Metric bar ── */
+.nx-bar {
+  height: 6px; border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.nx-bar > div {
+  height: 100%; border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* ── Phase chip ── */
+.nx-chip {
+  flex: 1; text-align: center;
+  padding: 9px 0; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--nexus-line);
+  transition: all 0.3s;
+}
+.nx-chip.nx-on {
+  background: rgba(90, 140, 255, 0.18);
+  border-color: rgba(120, 160, 255, 0.5);
+  box-shadow: 0 0 18px rgba(90, 140, 255, 0.35);
+}
+
+/* ── Spark chip ── */
+.nx-spark {
+  flex: 1; text-align: center;
+  font-size: 9.5px; padding: 6px 0;
+  border-radius: 8px;
+  background: rgba(255, 208, 138, 0.06);
+  border: 1px solid rgba(255, 208, 138, 0.16);
+  color: #ffe6bf;
+  transition: all 0.3s;
+}
+.nx-spark.nx-on {
+  border-color: #ffd08a;
+  box-shadow: 0 0 12px rgba(255, 208, 138, 0.45);
+  background: rgba(255, 208, 138, 0.14);
+}
+
+/* ── Genie dot ── */
+.nx-gdot {
+  width: 9px; height: 9px;
+  border-radius: 50%; flex-shrink: 0;
+}
+
+/* ── Tag pill ── */
+.nx-tag {
+  font-size: 10px; padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--nexus-line);
+  color: #dfe8ff;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(120,160,255,.2); border-radius: 2px; }
+
+/* ── Narrow viewport: stack panels ── */
+@media (max-width: 1080px) {
+  .nx-sidebar { display: none !important; }
+  .nx-mid { flex-direction: column !important; gap: 12px; overflow: auto; }
+}
