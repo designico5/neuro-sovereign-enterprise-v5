@@ -1,0 +1,18 @@
+{
+  "archived_at": "20260910_070211",
+  "invariant": "no_delete_or_overwrite_during_migration",
+  "items": [
+    {
+      "path": "99_ARCHIVE/science-codeevolve",
+      "reason": "empty directory (0 files) \u2014 planned module, not implemented"
+    },
+    {
+      "path": "99_ARCHIVE/self_improving_coding_agent",
+      "reason": "empty directory (0 files) \u2014 planned module, not implemented"
+    },
+    {
+      "path": "99_ARCHIVE/verus",
+      "reason": "empty directory (0 files) \u2014 formal verification, not implemented"
+    }
+  ]
+}

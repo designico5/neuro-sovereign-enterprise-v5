@@ -1,0 +1,16 @@
+# Neuro-Sovereign Enterprise v5 – Pod Disruption Budget
+# Ensures at least 1 NSE pod stays available during voluntary disruptions
+# (node drains, cluster autoscaler, maintenance).
+# Apply with: kubectl apply -f k8s/nse-pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nse
+  namespace: neurosovereign
+  labels:
+    app.kubernetes.io/name: neurosovereign
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: neurosovereign

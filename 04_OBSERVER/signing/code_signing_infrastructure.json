@@ -1,0 +1,99 @@
+{
+  "version": "5.0-symbiosis",
+  "code_signing_infrastructure": {
+    "platforms": {
+      "macos": {
+        "enabled": true,
+        "certificate_type": "Apple Developer ID",
+        "signing_tools": ["codesign", "productsign"],
+        "notarization": {
+          "enabled": true,
+          "tool": "xcrun notarytool",
+          "apple_id_required": true,
+          "app_specific_password_required": true
+        },
+        "entitlements": {
+          "file": "entitlements.mac.plist",
+          "sandbox_enabled": true,
+          "hardened_runtime": true
+        },
+        "security_features": {
+          "hardened_runtime": true,
+          "app_sandbox": true,
+          "library_validation": true,
+          "kill_injected": true
+        }
+      },
+      "windows": {
+        "enabled": true,
+        "certificate_type": "Authenticode Code Signing Certificate",
+        "signing_tools": ["signtool", "SignTool.exe"],
+        "certificate_authorities": ["DigiCert", "Sectigo", "GlobalSign"],
+        "timestamp_servers": [
+          "http://timestamp.digicert.com",
+          "http://timestamp.sectigo.com",
+          "http://timestamp.globalsign.com"
+        ],
+        "security_features": {
+          "dual_signing": true,
+          "sha256_support": true,
+          "cross_certificate": true
+        }
+      },
+      "linux": {
+        "enabled": true,
+        "signing_tools": ["gpg", "detached-sig"],
+        "package_signing": ["deb", "rpm"],
+        "repository_signing": true
+      }
+    },
+    "certificate_management": {
+      "storage": "hashicorp_vault",
+      "rotation_policy": "90_days",
+      "backup_required": true,
+      "hardware_security_module": "optional",
+      "multi_signature": true
+    },
+    "build_integration": {
+      "supported_frameworks": [
+        "Electron",
+        "React Native",
+        "Flutter",
+        "Qt",
+        "Native C++",
+        "Go",
+        "Rust"
+      ],
+      "ci_cd_integration": {
+        "github_actions": true,
+        "gitlab_ci": true,
+        "jenkins": true,
+        "azure_pipelines": true
+      }
+    },
+    "audit_trail": {
+      "blockchain_anchoring": true,
+      "detailed_logging": true,
+      "signature_verification": true,
+      "compliance_reporting": true
+    },
+    "compliance_standards": {
+      "apple": ["Developer Program License Agreement", "App Store Review Guidelines"],
+      "microsoft": ["Microsoft Verified Publisher", "Windows Hardware Compatibility"],
+      "general": ["ISO 27001", "SOC 2", "GDPR"]
+    }
+  },
+  "neuro_sovereign_integration": {
+    "identity_anchoring": true,
+    "compliance_layer": "17_legal",
+    "audit_layer": "14_governance",
+    "verification_layer": "8_verification",
+    "benefits": [
+      "Blockchain-verified signatures",
+      "Automated compliance checking",
+      "Multi-sig certificate management",
+      "Audit trail for all signed applications",
+      "Regulatory compliance integration"
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "method": "NexusTorus 369/Spark²",
+  "stamp": "20260910_070211",
+  "invariants": [
+    "no_delete_or_overwrite_during_migration",
+    "unknown_evidence_is_not_success"
+  ],
+  "layers": {
+    "01_CORE": {
+      "role": "invarianter Kernel",
+      "contains": [
+        "neurosovereign/",
+        "neuro_stack_final.toml"
+      ],
+      "note": "The 17-layer Python package + invariant stack config"
+    },
+    "02_MEMBRANE": {
+      "role": "semi-permeable Grenze",
+      "contains": [
+        "k8s/",
+        "terraform/",
+        "Dockerfile",
+        "docker-compose.yml"
+      ],
+      "note": "IaC + container boundary — infrastructure as membrane"
+    },
+    "03_SYNAPSE": {
+      "role": "autokatalytisches Netzwerk",
+      "contains": [
+        "config/ (ehem. layers/)",
+        "ai_providers_config.json",
+        "ai_provider_manager.py",
+        "AI_PROVIDERS_README.md"
+      ],
+      "note": "Layer config + AI provider connectivity"
+    },
+    "04_OBSERVER": {
+      "role": "Meta-Ebene",
+      "contains": [
+        ".github/",
+        "security/",
+        "signing/",
+        "state/"
+      ],
+      "note": "CI/CD + security analysis + code signing + runtime state"
+    },
+    "05_OUTPUT": {
+      "role": "manifestierte Realität",
+      "contains": [
+        "deployment/",
+        "voice/",
+        "desktop/",
+        "setup/"
+      ],
+      "note": "Deployment scripts + voice + desktop + setup scripts"
+    },
+    "99_ARCHIVE": {
+      "role": "Verdauungstrakt",
+      "contains": [
+        "science-codeevolve/",
+        "self_improving_coding_agent/",
+        "verus/",
+        "_manifest.json"
+      ],
+      "note": "Empty orphan directories — stashed, not deleted"
+    }
+  },
+  "root_kept": [
+    "README.md",
+    "requirements.txt",
+    "package.json",
+    "pyproject.toml",
+    ".env.template",
+    ".gitignore",
+    ".gitmodules"
+  ]
+}

@@ -122,7 +122,7 @@ voice = [
 nse = "neurosovereign.cli:app"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["01_CORE"]
 include = ["neurosovereign*"]
 
 [tool.pytest.ini_options]
