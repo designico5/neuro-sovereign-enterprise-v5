@@ -67,7 +67,10 @@ Essenz, ohne das Verhalten der Moleküle zu ändern (nur Defects + Konsistenz).
 2. Calico CNI aktivieren → FQDN-`host`-Einträge wirksam
 3. L16: `NSE_GEO_PROVIDER` an echte Geo-DB (MaxMind/IP2Location) koppeln
 4. L1: `sample_once` → echte pynvml-Telemetrie (HW-abhängig)
-5. OSINT-Connector: L5 `dispatch_osint_lookup()` verdrahten
+5. ~~OSINT-Connector: L5 `dispatch_osint_lookup()` verdrahten~~ — ✅ **gelöst in `ef4e4f5`**:
+   die öffentliche `L5.dispatch_osint_lookup()` ist drin, `bind_intelowl()` läuft
+   end-to-end (nur der IntelOwl-Dienst + die FQDN-Whitelist-Einträge fehlen noch
+   als Betrieb).
 
 ## Companion-Artefakt
 
