@@ -113,6 +113,11 @@ _inventory.txt
 _inventory2.txt
 _verify.txt
 _consolidate_out.txt
+_nexus_fix_ci.py
+_nexus_fix_ci2.py
+_nexus_fix_smoke.py
+_nexus_compilecheck.py
+_sbom_logs.txt
 
 # NEXUS TORUS - keep verification / consolidation / migration tooling
 !_nexus_verify_collapse.py
