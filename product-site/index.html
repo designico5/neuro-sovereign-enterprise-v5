@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NSE-v5 · Sovereign Neuro-Symbolic Enterprise</title>
+<meta name="description" content="NSE-v5 is a 17-layer neuro-symbolic sovereign AI operations platform — compute, governance, code evolution and legal sovereignty as one living organism. Ed25519-sealed, multisig-verified, machine-proof." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Archivo:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============ RESET / TOKENS ============ */
+:root{
+  --bg:#06070c; --bg2:#0a0c16; --bg3:#0d1020;
+  --ink:#ece9e1; --ink-dim:#8a8c9a; --ink-faint:#565866;
+  --gold:#d8b45a; --gold-hi:#f2d98c; --gold-soft:rgba(216,180,90,.12);
+  --cyan:#57e6d4; --cyan-hi:#8ff6e8; --cyan-soft:rgba(87,230,212,.12);
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --panel:rgba(255,255,255,.03); --panel-2:rgba(255,255,255,.05);
+  --font-d:"Fraunces",Georgia,serif;
+  --font-b:"Archivo",system-ui,sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-b);
+  line-height:1.55; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  font-weight:300; letter-spacing:.005em;
+}
+/* ============ ATMOSPHERE: gradient mesh + grain ============ */
+.atmos{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60% 55% at 78% 18%, rgba(216,180,90,.10), transparent 60%),
+    radial-gradient(55% 60% at 12% 78%, rgba(87,230,212,.09), transparent 60%),
+    radial-gradient(40% 40% at 50% 40%, rgba(120,90,200,.05), transparent 70%);
+}
+.atmos::after{content:"";position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.grid-lines{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px;mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 85%);}
+main{position:relative;z-index:2}
+/* ============ CURSOR + PROGRESS ============ */
+.cur-dot,.cur-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:99;border-radius:50%;mix-blend-mode:screen}
+.cur-dot{width:6px;height:6px;background:var(--gold-hi);transform:translate(-50%,-50%)}
+.cur-ring{width:34px;height:34px;border:1px solid rgba(216,180,90,.5);transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s}
+body.hover .cur-ring{width:58px;height:58px;border-color:var(--cyan)}
+.progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;
+  background:linear-gradient(90deg,var(--gold),var(--cyan));box-shadow:0 0 12px rgba(87,230,212,.6)}
+@media (pointer:coarse){.cur-dot,.cur-ring{display:none}}
+/* ============ LAYOUT ============ */
+.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,56px)}
+section{position:relative;padding:clamp(72px,11vh,140px) 0}
+.eyebrow{font-family:var(--font-m);font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--ink-dim);display:inline-flex;align-items:center;gap:.7em}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--gold)}
+h1,h2,h3{font-family:var(--font-d);font-weight:400;line-height:1.02;letter-spacing:-.01em}
+.sec-head{display:flex;flex-direction:column;gap:1.1rem;margin-bottom:clamp(40px,6vw,64px);max-width:760px}
+.sec-head h2{font-size:clamp(2.2rem,5.2vw,4.1rem)}
+.sec-head p{color:var(--ink-dim);max-width:56ch;font-size:1.02rem}
+.hl{color:var(--gold-hi);font-style:italic}
+.cy{color:var(--cyan)}
+/* ============ NAV ============ */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px clamp(20px,4vw,56px);
+  backdrop-filter:blur(14px);background:rgba(6,7,12,.62);border-bottom:1px solid transparent}
+nav.scrolled{border-bottom-color:var(--line);background:rgba(6,7,12,.85)}
+.brand{display:flex;align-items:center;gap:.7rem;font-family:var(--font-m);font-size:.82rem;letter-spacing:.22em;text-transform:uppercase}
+.brand .mk{width:15px;height:15px;border:1px solid var(--gold);transform:rotate(45deg);position:relative}
+.brand .mk::after{content:"";position:absolute;inset:3px;background:var(--gold);opacity:.6}
+.brand b{color:var(--ink);font-weight:600}
+.brand span{color:var(--ink-dim)}
+.nav-links{display:flex;gap:2rem;font-family:var(--font-m);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+.nav-links a{color:var(--ink-dim);text-decoration:none;transition:color .2s;position:relative}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-5px;width:0;height:1px;background:var(--gold);transition:width .3s}
+.nav-links a:hover::after{width:100%}
+.nav-cta{font-family:var(--font-m);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--bg);background:var(--gold);padding:.6rem 1.1rem;text-decoration:none;font-weight:600;
+  clip-path:polygon(0 0,100% 0,100% 70%,92% 100%,0 100%);transition:background .25s,transform .25s}
+.nav-cta:hover{background:var(--gold-hi);transform:translateY(-1px)}
+@media(max-width:820px){.nav-links{display:none}}
+/* ============ HERO ============ */
+.hero{min-height:100svh;display:grid;align-items:center;padding-top:110px;position:relative;overflow:hidden}
+#torus{position:absolute;inset:0;z-index:1}
+.hero-core{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;opacity:.5}
+.hero-core .orb{width:min(52vh,460px);height:min(52vh,460px);border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,rgba(216,180,90,.5),rgba(216,180,90,.05) 45%,transparent 70%);
+  filter:blur(6px);animation:breath 7s ease-in-out infinite}
+@keyframes breath{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.08);opacity:.7}}
+.hero-copy{position:relative;z-index:3;max-width:680px}
+.hero .eyebrow{margin-bottom:1.8rem}
+.hero h1{font-size:clamp(3rem,9vw,7rem);letter-spacing:-.02em;margin-bottom:1.6rem}
+.hero h1 .it{font-style:italic;color:var(--gold-hi);font-weight:300}
+.hero h1 .sub{display:block;font-size:.34em;font-family:var(--font-b);font-weight:300;color:var(--ink-dim);
+  letter-spacing:0;line-height:1.4;max-width:44ch;margin-top:1.1rem}
+.hero-sub{font-size:1.08rem;color:var(--ink-dim);max-width:52ch;margin-bottom:2.2rem}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+.btn{font-family:var(--font-m);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;
+  padding:.95rem 1.7rem;position:relative;display:inline-flex;align-items:center;gap:.7rem;transition:.28s;cursor:pointer;border:none}
+.btn-p{background:var(--gold);color:#0a0a0a;font-weight:600;
+  clip-path:polygon(0 0,100% 0,100% 72%,90% 100%,0 100%)}
+.btn-p:hover{background:var(--gold-hi);transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(216,180,90,.6)}
+.btn-g{border:1px solid var(--line-2);color:var(--ink);background:var(--panel)}
+.btn-g:hover{border-color:var(--cyan);color:var(--cyan-hi);background:var(--cyan-soft)}
+.btn .ar{transition:transform .28s}.btn:hover .ar{transform:translateX(4px)}
+/* stat strip */
+.stat-strip{position:relative;z-index:3;margin-top:3.6rem;display:flex;flex-wrap:wrap;gap:1px;
+  background:var(--line);border:1px solid var(--line);max-width:760px}
+.stat{flex:1 1 150px;padding:1.2rem 1.3rem;background:rgba(6,7,12,.7)}
+.stat .n{font-family:var(--font-d);font-size:2.2rem;line-height:1;color:var(--ink)}
+.stat .n em{font-style:normal;color:var(--gold)}
+.stat .l{font-family:var(--font-m);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);margin-top:.5rem}
+/* ticker */
+.ticker{position:absolute;left:0;right:0;bottom:0;z-index:3;overflow:hidden;border-top:1px solid var(--line);
+  background:rgba(6,7,12,.6);backdrop-filter:blur(6px)}
+.ticker .tk{display:flex;gap:0;white-space:nowrap;animation:slide 42s linear infinite;padding:.7rem 0}
+.ticker:hover .tk{animation-play-state:paused}
+.ticker span{font-family:var(--font-m);font-size:.72rem;letter-spacing:.1em;color:var(--ink-dim);padding:0 1.4rem;text-transform:uppercase}
+.ticker span b{color:var(--cyan);font-weight:500}
+.ticker span::before{content:"◆";color:var(--gold);margin-right:1.4rem;font-size:.55rem;vertical-align:middle}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ============ MANIFESTO ============ */
+.manifesto{padding-bottom:40px}
+.manifesto .lead{font-family:var(--font-d);font-size:clamp(1.8rem,4.6vw,3.4rem);line-height:1.18;
+  max-width:22ch;font-weight:300;margin-bottom:1.4rem}
+.manifesto .lead em{font-style:italic;color:var(--gold-hi)}
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:3rem}
+.pillar{background:var(--bg);padding:2.2rem;position:relative;overflow:hidden}
+.pillar .idx{font-family:var(--font-m);font-size:.7rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1.4rem;display:block}
+.pillar h3{font-size:1.5rem;margin-bottom:.8rem}
+.pillar p{color:var(--ink-dim);font-size:.95rem}
+.pillar::before{content:"";position:absolute;inset:auto auto 0 0;height:2px;width:0;background:var(--cyan);transition:width .6s}
+.pillar:hover::before{width:100%}
+@media(max-width:820px){.pillars{grid-template-columns:1fr}}
+/* ============ STRATA (5 spatial layers) ============ */
+.strata{position:relative}
+.strata .spine{position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(var(--gold),var(--cyan),transparent);z-index:0}
+.strata-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:1.1rem}
+.stratum{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1.4rem;padding:1.4rem 0;position:relative}
+.stratum .code{font-family:var(--font-m);font-size:1.05rem;letter-spacing:.18em;color:var(--gold)}
+.stratum .code em{font-style:normal;color:var(--ink-faint)}
+.stratum .node{width:60px;height:60px;border:1px solid var(--line-2);border-radius:50%;display:grid;place-items:center;
+  position:relative;background:var(--bg);flex:none}
+.stratum .node::before{content:"";position:absolute;inset:-9px;border:1px solid var(--line);border-radius:50%;
+  animation:ripple 3.4s ease-out infinite}
+@keyframes ripple{0%{transform:scale(.85);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+.stratum .node .g{font-family:var(--font-m);font-size:1.1rem}
+.stratum .s0 .node .g{color:var(--gold)} .stratum .s1 .node .g{color:#e79a5a}
+.stratum .s2 .node .g{color:var(--cyan)} .stratum .s3 .node .g{color:#8fb4ff}
+.stratum .s4 .node .g{color:#c98cff}
+.stratum .body h3{font-size:1.45rem;margin-bottom:.4rem}
+.stratum .body p{color:var(--ink-dim);font-size:.92rem;max-width:40ch}
+.stratum .left{text-align:right}.stratum .left p{margin-left:auto}
+.stratum .right p{margin-right:auto}
+.stratum .tag{font-family:var(--font-m);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin-top:.5rem;display:block}
+@media(max-width:820px){
+  .strata .spine{left:29px}
+  .stratum{grid-template-columns:auto 1fr;gap:1.1rem}
+  .stratum .left{display:none}
+  .stratum .body{text-align:left}
+  .stratum .right{grid-column:2}
+}
+/* ============ 17 LAYERS ============ */
+.marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:1rem 0;margin-bottom:3rem}
+.marquee .mq{display:flex;white-space:nowrap;animation:slide 34s linear infinite}
+.marquee .mq:hover{animation-play-state:paused}
+.marquee span{font-family:var(--font-d);font-size:1.5rem;font-style:italic;color:var(--ink-faint);padding:0 1.2rem}
+.marquee span::after{content:"·";color:var(--gold);margin-left:2.4rem}
+.layer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.lay{background:var(--bg);padding:1.5rem;position:relative;transition:background .3s;overflow:hidden}
+.lay::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0%,var(--glow,transparent),transparent 60%);opacity:0;transition:opacity .4s}
+.lay:hover{background:var(--bg2)}.lay:hover::after{opacity:1}
+.lay .ln{font-family:var(--font-m);font-size:1.6rem;font-weight:300;color:var(--gold);line-height:1}
+.lay .ln small{color:var(--ink-faint);font-size:.9rem}
+.lay h4{font-family:var(--font-b);font-weight:600;font-size:1rem;margin:.9rem 0 .4rem;letter-spacing:.01em}
+.lay p{color:var(--ink-dim);font-size:.82rem;line-height:1.5}
+.lay .mod{font-family:var(--font-m);font-size:.62rem;letter-spacing:.06em;color:var(--ink-faint);margin-top:.9rem;display:block;text-transform:uppercase}
+/* ============ SOVEREIGNTY ============ */
+.sov-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.sov{background:var(--bg);padding:2.4rem;position:relative}
+.sov .badge{width:46px;height:46px;border:1px solid var(--line-2);display:grid;place-items:center;margin-bottom:1.4rem;color:var(--gold)}
+.sov h3{font-size:1.4rem;margin-bottom:.6rem}
+.sov p{color:var(--ink-dim);font-size:.95rem;max-width:42ch}
+.sov .meta{font-family:var(--font-m);font-size:.66rem;letter-spacing:.14em;color:var(--cyan);margin-top:1.2rem;text-transform:uppercase}
+@media(max-width:820px){.sov-grid{grid-template-columns:1fr}}
+/* ============ SYMBIOSIS ============ */
+.symb{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.score{font-family:var(--font-d);font-size:clamp(6rem,16vw,11rem);line-height:.85;font-weight:300}
+.score .v{color:var(--gold-hi)}
+.score-lab{font-family:var(--font-m);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:1rem}
+.radar-box{position:relative;aspect-ratio:1;max-width:420px;margin:0 auto;width:100%}
+.radar-box canvas{width:100%;height:100%}
+.radar-cap{font-family:var(--font-m);font-size:.64rem;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-top:1rem;line-height:1.9}
+@media(max-width:820px){.symb{grid-template-columns:1fr;gap:2rem}.score{font-size:5rem}}
+/* ============ CONTROL ROOM / DEPLOY ============ */
+.cockpit{border:1px solid var(--line-2);background:linear-gradient(160deg,var(--bg2),var(--bg));position:relative;overflow:hidden}
+.cockpit .bar{display:flex;align-items:center;gap:.5rem;padding:.9rem 1.2rem;border-bottom:1px solid var(--line)}
+.cockpit .bar i{width:11px;height:11px;border-radius:50%;background:var(--line-2)}
+.cockpit .bar i:nth-child(1){background:#ff5f57}.cockpit .bar i:nth-child(2){background:#febc2e}.cockpit .bar i:nth-child(3){background:#28c840}
+.cockpit .bar b{font-family:var(--font-m);font-size:.72rem;color:var(--ink-dim);margin-left:auto;letter-spacing:.1em}
+.cockpit pre{font-family:var(--font-m);font-size:.82rem;line-height:1.95;padding:1.6rem;overflow-x:auto;color:var(--ink-dim);white-space:pre}
+.cockpit pre .k{color:var(--cyan)} .cockpit pre .ok{color:var(--gold-hi)}
+.cockpit pre .g{color:var(--ink)} .cockpit pre .m{color:var(--ink-faint)}
+.deploy-tags{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem}
+.dtag{font-family:var(--font-m);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line-2);padding:.55rem 1rem;color:var(--ink-dim);display:inline-flex;align-items:center;gap:.6rem}
+.dtag::before{content:"";width:6px;height:6px;background:var(--cyan);display:inline-block}
+/* ============ QUICK START ============ */
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.codebox{border:1px solid var(--line-2);background:var(--bg2);position:relative}
+.codebox .hd{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.1rem;border-bottom:1px solid var(--line)}
+.codebox .hd b{font-family:var(--font-m);font-size:.68rem;letter-spacing:.14em;color:var(--ink-dim);text-transform:uppercase}
+.copy{font-family:var(--font-m);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:1px solid var(--line-2);
+  color:var(--cyan);padding:.4rem .8rem;cursor:pointer;transition:.2s}
+.copy:hover{background:var(--cyan-soft);border-color:var(--cyan)}
+.codebox pre{font-family:var(--font-m);font-size:.85rem;line-height:2;padding:1.4rem 1.6rem;overflow-x:auto}
+.codebox pre .c{color:var(--ink-faint)} .codebox pre .p{color:var(--gold)} .codebox pre .g{color:var(--ink)} .codebox pre .o{color:var(--cyan)}
+@media(max-width:820px){.qs{grid-template-columns:1fr;gap:2rem}}
+/* ============ FOOTER ============ */
+footer{border-top:1px solid var(--line);padding:4rem 0 3rem;position:relative}
+.foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:2rem;margin-bottom:3rem}
+.foot-brand .mk2{width:20px;height:20px;border:1px solid var(--gold);transform:rotate(45deg);display:inline-block;position:relative;margin-bottom:1rem}
+.foot-brand .mk2::after{content:"";position:absolute;inset:4px;background:var(--gold);opacity:.6}
+.foot-brand p{color:var(--ink-dim);font-size:.9rem;max-width:34ch}
+.foot-col h5{font-family:var(--font-m);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:1rem}
+.foot-col a{display:block;color:var(--ink-dim);text-decoration:none;padding:.3rem 0;font-size:.9rem;transition:color .2s}
+.foot-col a:hover{color:var(--gold-hi)}
+.foot-bot{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid var(--line);
+  font-family:var(--font-m);font-size:.68rem;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;flex-wrap:wrap;gap:1rem}
+/* ============ REVEAL ============ */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}.rv.d4{transition-delay:.4s}.rv.d5{transition-delay:.5s}
+</style>
+</head>
+<body>
+<div class="atmos"></div>
+<div class="grid-lines"></div>
+<div class="progress" id="progress"></div>
+<div class="cur-dot"></div><div class="cur-ring"></div>
+
+<!-- ============ NAV ============ -->
+<nav id="nav">
+  <div class="brand"><span class="mk"></span><b>NSE</b><span>v5 · sovereign</span></div>
+  <div class="nav-links">
+    <a href="#strata">Strata</a>
+    <a href="#layers">17 Layers</a>
+    <a href="#sovereignty">Sovereignty</a>
+    <a href="#symbiosis">Symbiosis</a>
+    <a href="#deploy">Deploy</a>
+  </div>
+  <a class="nav-cta" href="#start">Deploy the stack</a>
+</nav>
+
+<main>
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-core"><div class="orb"></div></div>
+  <canvas id="torus"></canvas>
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow rv">17-Layer · Neuro-Symbolic · Sovereign</span>
+      <h1 class="rv d1">The self‑governing<br /><span class="it">AI enterprise.</span>
+        <span class="sub">Compute, governance, code evolution and legal sovereignty — engineered as one living organism, not a stack of services.</span>
+      </h1>
+      <p class="hero-sub rv d2">NSE-v5 runs your workloads, DAOs, evolving codebase and Ed25519‑sealed identity on a single 17‑layer neuro‑symbolic core — sealed by multisig quorum and machine‑verifiable proof.</p>
+      <div class="hero-cta rv d3">
+        <a class="btn btn-p mag" href="#start">Deploy the stack <span class="ar">→</span></a>
+        <a class="btn btn-g mag" href="#layers">Explore the 17 layers <span class="ar">↓</span></a>
+      </div>
+      <div class="stat-strip rv d4">
+        <div class="stat"><div class="n" data-count="17">17</div><div class="l">Live layers</div></div>
+        <div class="stat"><div class="n"><em>5</em></div><div class="l">Spatial strata</div></div>
+        <div class="stat"><div class="n" data-count="0.95" data-dec="2">0.95</div><div class="l">Symbiosis score</div></div>
+        <div class="stat"><div class="n">Apache</div><div class="l">2.0 · Open</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ticker" aria-hidden="true">
+    <div class="tk" id="tk">
+      <span><b>L09</b> cognition online · neuro‑symbolic bound</span>
+      <span><b>L17</b> multisig quorum reached · 3/3 signers</span>
+      <span><b>L06</b> sandbox jailed · no shell RCE</span>
+      <span><b>L08</b> proof sealed · machine‑verifiable</span>
+      <span><b>L15</b> Ed25519 identity attested</span>
+      <span><b>SYSTEM</b> symbiosis 0.95 · stable</span>
+      <span><b>L07</b> code evolved · 2 gen, 6 pop</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MANIFESTO ============ -->
+<section class="manifesto">
+  <div class="wrap">
+    <div class="manifesto-grid">
+    <div>
+      <span class="eyebrow rv">Manifesto</span>
+      <p class="lead rv d1">We don't <em>rent</em> intelligence. We build it, sign it, and hold it ourselves.</p>
+      <p class="rv d2" style="max-width:60ch;color:var(--ink-dim)">Most AI platforms hand you a black box someone else controls. NSE-v5 is the opposite: a sovereign machine that owns its own weights, proves its own behaviour, and answers to a quorum it defines — not a vendor's terms of service.</p>
+    </div>
+    </div>
+    <div class="pillars">
+      <div class="pillar rv"><span class="idx">01 · Sovereign</span><h3>Own the machine</h3><p>Self‑hosted, non‑root containers, your keys. The model, the memory and the money stay on your silicon — verifiable, extractable, and never locked away.</p></div>
+      <div class="pillar rv d1"><span class="idx">02 · Symbolic</span><h3>Provable, not vibes</h3><p>Formal verification (L08) and machine‑readable proof turn every operation into something an auditor — human or agent — can actually check.</p></div>
+      <div class="pillar rv d2"><span class="idx">03 · Living</span><h3>It evolves</h3><p>A code‑evolution layer (L07) rewrites the platform's own genome across generations, bounded by sandbox and proof — a closed metabolic loop.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STRATA ============ -->
+<section class="strata" id="strata">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow rv">Symbiotic Topology</span>
+      <h2 class="rv d1">Five strata, one <span class="hl">living</span> organism.</h2>
+      <p class="rv d2">The 17 layers don't live flat. They're compressed into five spatial strata — a kernel at the core, a membrane to the world, synapses to rewire it, an observer to keep it honest, and output that becomes manifest reality.</p>
+    </div>
+    <div class="strata-list">
+      <div class="spine"></div>
+      <div class="stratum s0 rv"><div class="left"><div class="code">01_CORE</div></div><div class="node"><span class="g">01</span></div><div class="body right"><h3>Core · Invariant Kernel</h3><p>The neuro‑symbolic heart — all 17 layer modules as one build‑active package.</p><span class="tag">neurosovereign/</span></div></div>
+      <div class="stratum s1 rv d1"><div class="left"></div><div class="node"><span class="g">02</span></div><div class="body"><h3>Membrane · Boundary</h3><p>Container & IaC — the semi‑permeable skin to the outside world.</p><span class="tag">k8s · terraform · docker</span></div></div>
+      <div class="stratum s2 rv"><div class="left"><div class="code">03_SYNAPSE</div></div><div class="node"><span class="g">03</span></div><div class="body right"><h3>Synapse · Autocatalytic</h3><p>Config + AI‑provider reagents that let the core rewire itself.</p><span class="tag">config/ · ai_providers</span></div></div>
+      <div class="stratum s3 rv d1"><div class="left"></div><div class="node"><span class="g">04</span></div><div class="body"><h3>Observer · Meta‑plane</h3><p>CI/CD, security, signing and runtime state — the plane that watches the whole.</p><span class="tag">.github · security · state</span></div></div>
+      <div class="stratum s4 rv"><div class="left"><div class="code">05_OUTPUT</div></div><div class="node"><span class="g">05</span></div><div class="body right"><h3>Output · Manifest Reality</h3><p>Deployment, voice, desktop and setup — everything that reaches the world.</p><span class="tag">deployment · voice · desktop</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 17 LAYERS ============ -->
+<section id="layers">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow rv">The Genome</span>
+      <h2 class="rv d1">Seventeen layers, each with a <span class="cy">job</span>.</h2>
+      <p class="rv d2">From raw energy feedback up to legal sovereignty — a complete operating stack for an autonomous enterprise.</p>
+    </div>
+    <div class="marquee" aria-hidden="true"><div class="mq" id="mq">
+      <span>Energy Feedback</span><span>Compute Silicon</span><span>Infrastructure IaC</span><span>Data Knowledge</span><span>Integration API</span><span>Execution Sandbox</span><span>Code Evolution</span><span>Verification Proof</span><span>Cognition</span><span>Orchestration Swarm</span><span>DAO Governance</span><span>Vision Goals</span><span>Strategy Market</span><span>Governance Compliance</span><span>Ethos Identity</span><span>GeoPol Router</span><span>Legal Sovereignty</span>
+    </div></div>
+    <div class="layer-grid" id="layerGrid"></div>
+  </div>
+</section>
+
+<!-- ============ SOVEREIGNTY ============ -->
+<section id="sovereignty">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow rv">Sealed by Design</span>
+      <h2 class="rv d1">Sovereignty you can <span class="hl">verify</span>.</h2>
+      <p class="rv d2">Four structural guarantees make NSE‑v5 not just powerful, but accountable — the way a state is accountable, not a black box.</p>
+    </div>
+    <div class="sov-grid">
+      <div class="sov rv">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Ed25519 Identity</h3><p>Every node and agent carries a machine‑verifiable identity (L15). No impersonation, no ambiguous actor — sign, verify, and attribute to the exact key.</p>
+        <div class="meta">Layer 15 · Ethos & Identity</div>
+      </div>
+      <div class="sov rv d1">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div>
+        <h3>Multisig Quorum</h3><p>High‑consequence operations only move when a threshold of independent signers agrees (L17). Power is deliberately distributed — no single point of control.</p>
+        <div class="meta">Layer 17 · Legal Sovereignty</div>
+      </div>
+      <div class="sov rv d2">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg></div>
+        <h3>Jailbroken Sandbox</h3><p>Execution (L06) runs Restricted Python with no builtins, no shell, no filesystem escape — commands only inside a read‑only, caps‑dropped ephemeral container.</p>
+        <div class="meta">Layer 6 · Execution Sandbox</div>
+      </div>
+      <div class="sov rv d3">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12h4l2 6 4-12 2 6h4"/></svg></div>
+        <h3>Machine Proof</h3><p>Verification (L08) emits machine‑readable proof for critical invariants. Sovereignty stops being a slogan and becomes a checkable artifact.</p>
+        <div class="meta">Layer 8 · Verification Proof</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SYMBIOSIS ============ -->
+<section id="symbiosis">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow rv">Symbiotic Topology</span>
+      <h2 class="rv d1">How well does the machine <span class="cy">work with itself</span>?</h2>
+      <p class="rv d2">We track a live symbiosis score across six axes. A healthy NSE is not one that's strong — it's one whose layers reinforce each other without a layer starving another.</p>
+    </div>
+    <div class="symb">
+      <div class="rv">
+        <div class="score"><span class="v" id="scoreVal" data-count="0.95" data-dec="2">0.95</span></div>
+        <div class="score-lab">Symbiosis score · production baseline</div>
+        <div class="deploy-tags" style="margin-top:2rem">
+          <span class="dtag">No starvation</span>
+          <span class="dtag">Closed metabolic loop</span>
+          <span class="dtag">3‑6‑9 resonance</span>
+        </div>
+      </div>
+      <div class="rv d1">
+        <div class="radar-box"><canvas id="radar"></canvas></div>
+        <div class="radar-cap">Cognition · Governance · Autonomy · Security · Symbiosis · Evolution<br/>Axes from the live neuro‑symbolic telemetry.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEPLOY / CONTROL ROOM ============ -->
+<section id="deploy">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow rv">Production Ready</span>
+      <h2 class="rv d1">From repo to <span class="hl">fleet</span> in one command.</h2>
+      <p class="rv d2">Kubernetes manifests, Terraform and a multi‑stage Docker build ship together. Healthcheck wired, non‑root user, read‑only sandbox. It's an organism, not a zip file.</p>
+    </div>
+    <div class="cockpit rv">
+      <div class="bar"><i></i><i></i><i></i><b>nse · control room</b></div>
+      <pre><span class="m">$ </span><span class="g">nse status</span>
+<span class="k">┌───────────────────────────────────────────┐</span>
+<span class="k">│</span>  <span class="g">Neuro‑Sovereign Enterprise v5.0</span>            <span class="k">│</span>
+<span class="k">│</span>  layers   <span class="ok">17/17 online</span>                    <span class="k">│</span>
+<span class="k">│</span>  symbiosis <span class="ok">0.95 · stable</span>                  <span class="k">│</span>
+<span class="k">│</span>  quorum   <span class="ok">3/3 signers attested</span>           <span class="k">│</span>
+<span class="k">│</span>  proof    <span class="ok">sealed · machine‑verifiable</span>     <span class="k">│</span>
+<span class="k">└───────────────────────────────────────────┘</span>
+<span class="m">$ </span><span class="g">nse start</span>
+<span class="ok">◆ 17 layers live · metabolic loop closed · observing</span></pre>
+      <div class="deploy-tags">
+        <span class="dtag">Kubernetes</span><span class="dtag">Terraform</span><span class="dtag">Docker · multi‑stage</span><span class="dtag">non‑root</span><span class="dtag">healthcheck</span><span class="dtag">read‑only sandbox</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUICK START ============ -->
+<section id="start">
+  <div class="wrap">
+    <div class="qs">
+      <div class="rv">
+        <span class="eyebrow">Quick start</span>
+        <h2 style="font-size:clamp(2rem,4.6vw,3.4rem);margin:1.2rem 0">Three commands<br />to <span class="cy">wake it up</span>.</h2>
+        <p style="color:var(--ink-dim);max-width:44ch;margin-bottom:2rem">Install in editable mode, smoke‑test all 17 layers, then start the full organism. That's the whole ceremony.</p>
+        <div class="hero-cta">
+          <a class="btn btn-p mag" href="https://github.com/designico5/neuro-sovereign-enterprise-v5">Get the repo <span class="ar">→</span></a>
+        </div>
+      </div>
+      <div class="codebox rv d1">
+        <div class="hd"><b>terminal</b><button class="copy" id="copyBtn">Copy</button></div>
+        <pre id="qsc"><span class="c"># install the sovereign stack</span>
+<span class="p">pip install</span> <span class="g">-e .</span>
+
+<span class="c"># smoke‑test all 17 layers</span>
+<span class="g">nse</span> <span class="o">test</span>
+
+<span class="c"># health report</span>
+<span class="g">nse</span> <span class="o">status</span>
+
+<span class="c"># start the full organism</span>
+<span class="g">nse</span> <span class="o">start</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand rv">
+        <span class="mk2"></span>
+        <p>NSE‑v5 · a 17‑layer neuro‑symbolic sovereign enterprise platform. Built on the 369 / Spark² method. Apache‑2.0.</p>
+      </div>
+      <div class="foot-col rv d1">
+        <h5>Platform</h5>
+        <a href="#layers">The 17 Layers</a><a href="#strata">Five Strata</a><a href="#sovereignty">Sovereignty</a><a href="#symbiosis">Symbiosis</a>
+      </div>
+      <div class="foot-col rv d2">
+        <h5>Launch</h5>
+        <a href="https://github.com/designico5/neuro-sovereign-enterprise-v5">GitHub</a><a href="#start">Quick Start</a><a href="#deploy">Deploy</a><a href="#top">Back to top ↑</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>© NSE‑v5 · Apache‑2.0 · Built as one living organism</span>
+      <span>369 / Spark² · no‑delete invariant · 17 → 5 compression</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ SCRIPT ============ -->
+<script>
+/* ---------- cursor ---------- */
+(function(){
+  if(!matchMedia("(pointer:fine)").matches) return;
+  var dot=document.querySelector(".cur-dot"),ring=document.querySelector(".cur-ring");
+  var x=innerWidth/2,y=innerHeight/2,rx=x,ry=y;
+  addEventListener("mousemove",e=>{x=e.clientX;y=e.clientY;dot.style.left=x+"px";dot.style.top=y+"px";
+    var t=e.target.closest("a,button,.lay,.stratum,.sov");document.body.classList.toggle("hover",!!t);});
+  (function loop(){rx+=(x-rx)*.16;ry+=(y-ry)*.16;ring.style.left=rx+"px";ring.style.top=ry+"px";requestAnimationFrame(loop);})();
+})();
+/* ---------- progress + nav ---------- */
+var prog=document.getElementById("progress"),nav=document.getElementById("nav");
+addEventListener("scroll",()=>{
+  var h=document.documentElement;var p=h.scrollTop/(h.scrollHeight-h.clientHeight);
+  prog.style.width=(p*100)+"%";nav.classList.toggle("scrolled",h.scrollTop>40);
+});
+/* ---------- magnetic ---------- */
+document.querySelectorAll(".mag").forEach(b=>{
+  b.addEventListener("mousemove",e=>{var r=b.getBoundingClientRect();
+    b.style.transform="translate("+((e.clientX-r.left-r.width/2)*.18)+"px,"+((e.clientY-r.top-r.height/2)*.28-2)+"px)";});
+  b.addEventListener("mouseleave",()=>b.style.transform="");
+});
+/* ---------- reveal ---------- */
+var io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll(".rv").forEach(el=>io.observe(el));
+/* ---------- count-up ---------- */
+function countUp(el){var t=parseFloat(el.dataset.count||el.textContent);var d=parseInt(el.dataset.dec||0);
+  var s0=performance.now();(function step(now){var p=Math.min(1,(now-s0)/1600);p=1-Math.pow(1-p,3);
+    el.textContent=(t*p).toFixed(d);if(p<1)requestAnimationFrame(step);else el.textContent=t.toFixed(d);})(s0);}
+var cio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){countUp(e.target);cio.unobserve(e.target);}}),{threshold:.6});
+document.querySelectorAll("[data-count]").forEach(el=>cio.observe(el));
+/* ---------- 17 layer grid ---------- */
+var L=[["1","Energy Feedback","layer_1_energy","Closed energy‑feedback sense of the whole."],
+["2","Compute Silicon","layer_2_compute","Where the organism actually thinks."],
+["3","Infrastructure IaC","layer_3_infra","The skeleton — declarative, reproducible."],
+["4","Data Knowledge","layer_4_data","Memory that is queryable, not buried."],
+["5","Integration API","layer_5_integration","The face to the outside world."],
+["6","Execution Sandbox","layer_6_cognitive","Restricted, jailed execution."],
+["7","Code Evolution","layer_7_evolution","The genome rewrites itself."],
+["8","Verification Proof","layer_8_verification","Machine‑checkable invariants."],
+["9","Cognition","layer_9_cognition","Neuro‑symbolic reasoning core."],
+["10","Orchestration Swarm","layer_10_swarm","Agents that coordinate without a boss."],
+["11","DAO Governance","layer_11_dao","Decisions by token, not by person."],
+["12","Vision Goals","layer_12_vision","The organism knows what it wants."],
+["13","Strategy Market","layer_13_strategy","Options are priced and picked."],
+["14","Governance Compliance","layer_14_governance","Rules the machine can't break."],
+["15","Ethos Identity","layer_15_ethos","Ed25519‑sealed, attributable."],
+["16","GeoPol Router","layer_16_geo","Jursdiction‑aware routing."],
+["17","Legal Sovereignty","layer_17_legal","Multisig quorum over power."]];
+var gl=document.getElementById("layerGrid");
+gl.innerHTML=L.map((x,i)=>{var gl2=i%3===0?"#d8b45a":i%3===1?"#57e6d4":"#8fb4ff";
+  return '<div class="lay rv" style="--glow:radial-gradient(120% 90% at 100% 0%,'+gl2+'22,transparent 60%)"><div class="ln">'+String(x[0]).padStart(2,"0")+'<small>/17</small></div><h4>'+x[1]+'</h4><p>'+x[3]+'</p><span class="mod">'+x[2]+'</span></div>';}).join("");
+document.querySelectorAll("#layerGrid .rv").forEach(el=>io.observe(el));
+/* ---------- marquee dup ---------- */
+document.querySelectorAll(".mq").forEach(m=>{m.innerHTML+=m.innerHTML;});
+document.getElementById("tk").innerHTML+=document.getElementById("tk").innerHTML;
+/* ---------- copy ---------- */
+document.getElementById("copyBtn").addEventListener("click",()=>{navigator.clipboard.writeText(document.getElementById("qsc").textContent);
+  var b=document.getElementById("copyBtn");b.textContent="Copied ✓";setTimeout(()=>b.textContent="Copy",1400);});
+/* ---------- radar (canvas, no deps) ---------- */
+(function(){var c=document.getElementById("radar");if(!c)return;var ctx=c.getContext("2d");
+  var labels=["Cognition","Governance","Autonomy","Security","Symbiosis","Evolution"];var vals=[.92,.95,.88,.97,.95,.86];
+  function size(){var dpr=devicePixelRatio||1;var s=c.clientWidth;c.width=s*dpr;c.height=s*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(p){var w=c.clientWidth,h=c.clientWidth,cx=w/2,cy=h/2,R=Math.min(w,h)/2-34;ctx.clearRect(0,0,w,h);
+    ctx.font="10px 'IBM Plex Mono'";ctx.textAlign="center";ctx.textBaseline="middle";
+    for(var ring=1;ring<=4;ring++){ctx.beginPath();for(var i=0;i<=labels.length;i++){var a=-Math.PI/2+i*(2*Math.PI/labels.length);
+      var x=cx+Math.cos(a)*R*(ring/4),y=cy+Math.sin(a)*R*(ring/4);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();
+      ctx.strokeStyle="rgba(255,255,255,.07)";ctx.stroke();}
+    labels.forEach((l,i)=>{var a=-Math.PI/2+i*(2*Math.PI/labels.length);ctx.beginPath();ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);ctx.strokeStyle="rgba(255,255,255,.06)";ctx.stroke();
+      ctx.fillStyle="#8a8c9a";ctx.fillText(l.toUpperCase(),cx+Math.cos(a)*(R+18),cy+Math.sin(a)*(R+18));});
+    ctx.beginPath();vals.forEach((v,i)=>{var a=-Math.PI/2+i*(2*Math.PI/vals.length);var x=cx+Math.cos(a)*R*v*p,y=cy+Math.sin(a)*R*v*p;
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();ctx.fillStyle="rgba(87,230,212,.15)";ctx.fill();
+    ctx.strokeStyle="#57e6d4";ctx.lineWidth=1.6;ctx.stroke();
+    vals.forEach((v,i)=>{var a=-Math.PI/2+i*(2*Math.PI/vals.length);ctx.beginPath();ctx.arc(cx+Math.cos(a)*R*v*p,cy+Math.sin(a)*R*v*p,2.4,0,7);
+      ctx.fillStyle="#f2d98c";ctx.fill();});}
+  var started=false;var rio=new IntersectionObserver(es=>{if(es[0].isIntersecting&&!started){started=true;
+    var s0=performance.now();(function st(n){var p=Math.min(1,(n-s0)/1400);p=1-Math.pow(1-p,3);draw(p);if(p<1)requestAnimationFrame(st);})(s0);rio.disconnect();}},{threshold:.4});
+  rio.observe(c);size();addEventListener("resize",()=>{size();draw(started?1:0);});draw(0.0001);
+})();
+/* ---------- Three.js torus hero (enhancement, CSS fallback behind) ---------- */
+(function(){
+  var cv=document.getElementById("torus");if(!cv)return;
+  var canvas=cv;canvas.style.display="block";canvas.width=innerWidth;canvas.height=innerHeight;canvas.style.width="100%";canvas.style.height="100%";
+  var THREE;
+  function boot(){
+    var scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,100),
+        gl=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.setSize(innerWidth,innerHeight);
+    var g=new THREE.Group();scene.add(g);
+    // core: 17 golden-angle spheres
+    for(var i=0;i<17;i++){var a=i*2.39996,r=0.55+0.03*i,y=0.55-Math.sin(i*2.39996)*0.5;
+      var m=new THREE.Mesh(new THREE.SphereGeometry(.05,16,16),new THREE.MeshBasicMaterial({color:0xf2d98c,transparent:true,opacity:.9,blending:THREE.AdditiveBlending}));
+      m.position.set(Math.cos(a)*r,y-i*0.028,Math.sin(a)*r);g.add(m);}
+    // 5 strata rings
+    var rings=[[0.9,0xd8b45a],[1.35,0xe79a5a],[1.8,0x57e6d4],[2.25,0x8fb4ff],[2.7,0xc98cff]];
+    rings.forEach((rr,i)=>{var t=new THREE.Mesh(new THREE.TorusGeometry(rr[0],.02,12,90),
+      new THREE.MeshBasicMaterial({color:rr[1],transparent:true,opacity:.5,blending:THREE.AdditiveBlending}));
+      t.rotation.x=Math.PI/2+t.rotation;g.add(t);t.rotation.x=Math.PI/2+i*.12;t.position.y=-i*.28;});
+    // metabolism particles
+    var N=520,pos=new Float32Array(N*3);for(var i=0;i<N;i++){var a=Math.random()*6.28,r=1.2+Math.random()*1.6;
+      pos[i*3]=Math.cos(a)*r;pos[i*3+1]=(Math.random()-.5)*2;pos[i*3+2]=Math.sin(a)*r;}
+    var pg=new THREE.BufferGeometry();pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
+    var pts=new THREE.Points(pg,new THREE.PointsMaterial({color:0x8ff6e8,size:.03,transparent:true,opacity:.7,blending:THREE.AdditiveBlending}));scene.add(pts);
+    // starfield
+    var SN=400,sp=new Float32Array(SN*3);for(var i=0;i<SN;i++){sp[i*3]=(Math.random()-.5)*30;sp[i*3+1]=(Math.random()-.5)*20;sp[i*3+2]=-4-Math.random()*14;}
+    var sg=new THREE.BufferGeometry();sg.setAttribute("position",new THREE.BufferAttribute(sp,3));
+    scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0x555a72,size:.04,transparent:true,opacity:.5})));
+    g.position.x=innerWidth>820?1.6:0;g.rotation.x=.35;g.rotation.z=.15;
+    var mx=0,my=0;addEventListener("mousemove",e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5);});
+    var t0=0;(function anim(t){t0+=.0016;requestAnimationFrame(anim);
+      g.rotation.y=t0;g.rotation.x=.35+my*.4;g.rotation.z=.15+mx*.3;pts.rotation.y=-t0*.4;
+      cam.position.z=6.2;cam.lookAt(g.position.x,0,0);gl.render(scene,cam);})(0);
+    addEventListener("resize",()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();gl.setSize(innerWidth,innerHeight);});
+  }
+  var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js";
+  s.onload=()=>{try{THREE=window.THREE;boot();}catch(e){canvas.style.display="none";}};
+  s.onerror=()=>{canvas.style.display="none";}; // CSS orb fallback stays
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
