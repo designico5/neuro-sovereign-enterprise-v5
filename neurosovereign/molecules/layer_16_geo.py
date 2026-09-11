@@ -25,6 +25,15 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from .base import BaseNSELayer
 
+# Optional geo DB provider. Not a hard dependency: when geoip2 is absent we
+# fall back to the demo CIDR map so the layer keeps working in air-gapped demos.
+try:
+    import geoip2  # pip install geoip2 (optional, NSE_GEO_PROVIDER=geoip2)
+    _HAS_GEOIP2 = True
+except Exception:  # pragma: no cover - optional dependency
+    geoip2 = None  # type: ignore[assignment]
+    _HAS_GEOIP2 = False
+
 logger = logging.getLogger(__name__)
 
 Jurisdiction = str
@@ -113,6 +122,10 @@ class GeoPoliticalRouter(BaseNSELayer):
         # unsafe and masks real gaps, so it is OFF by default. Enable explicitly
         # for demo tooling only, via NSE_GEO_OCTET_HEURISTIC=1.
         self._octet_heuristic: bool = os.getenv("NSE_GEO_OCTET_HEURISTIC", "0").lower() in {"1", "true", "yes"}
+        # Optional real geo DB provider. When NSE_GEO_PROVIDER=geoip2 and the
+        # MaxMind/geoip2 reader file exists (NSE_GEO_DB_PATH), live IPs resolve
+        # through the real DB; otherwise we transparently fall back to the demo map.
+        self._geo_reader = self._build_geo_reader(self.geodb_provider, os.getenv("NSE_GEO_DB_PATH", ""))
 
     async def _initialize(self) -> None:
         self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
@@ -135,6 +148,7 @@ class GeoPoliticalRouter(BaseNSELayer):
         self.add_extra("jurisdictions", list(self.DEFAULT_JURISDICTION_MAP.keys()))
         self.add_extra("rules_count", len(self.rules))
         self.add_extra("geodb_provider", self.geodb_provider)
+        self.add_extra("geo_reader_active", self._geo_reader is not None)
         self.add_extra("preferred", self.preferred_jurisdiction)
         self.add_extra("audits_count", self._count("audits"))
 
@@ -194,6 +208,34 @@ class GeoPoliticalRouter(BaseNSELayer):
                 reroute_to=reroute, requires_human_veto=bool(veto),
             ))
 
+    @staticmethod
+    def _build_geo_reader(provider: str, db_path: str) -> Any:
+        """Build an optional real geo-DB reader.
+
+        Returns a MaxMind/geoip2 reader exposing `.city(ip).country.iso_code`,
+        or None when the provider is not 'geoip2', the library is missing, or
+        the database file does not exist. A None reader means we transparently
+        fall back to the demo CIDR map — the layer must never crash on init.
+        """
+        if provider != "geoip2":
+            return None
+        if not _HAS_GEOIP2:
+            logger.warning("L16 NSE_GEO_PROVIDER=geoip2 but geoip2 lib not installed; using demo IP map")
+            return None
+        if not db_path:
+            logger.warning("L16 NSE_GEO_PROVIDER=geoip2 but NSE_GEO_DB_PATH empty; using demo IP map")
+            return None
+        if not os.path.isfile(db_path):
+            logger.warning("L16 NSE_GEO_DB_PATH=%s not found; using demo IP map", db_path)
+            return None
+        try:
+            reader = geoip2.database.Reader(db_path)
+            logger.info("L16 real geo DB provider active: %s", db_path)
+            return reader
+        except Exception as exc:  # pragma: no cover - unreadable DB file
+            logger.warning("L16 geoip2 reader open failed (%s); using demo IP map", exc)
+            return None
+
     # --------------------------------------------------------------- geo API
     def route(self, operation: str, client_ip: str, target_jurisdiction: str,
               categories: List[DataCategory]) -> RouteAudit:
@@ -247,15 +289,30 @@ class GeoPoliticalRouter(BaseNSELayer):
     def jurisdiction_for_ip(self, ip: str) -> str:
         """Resolve IP → country → jurisdiction.
 
-        Default behaviour:
-          - Use a prefix-list-based demo map.
+        Resolution priority:
+          1. Real geo DB reader (when NSE_GEO_PROVIDER=geoip2 + a live DB file).
+          2. Deterministic demo CIDR prefix list.
+          3. Optional leading-octet heuristic (opt-in, demo tooling only).
           - If nothing matched -> "UNKNOWN".
         """
         try:
             addr = ipaddress.ip_address(ip)
         except ValueError:
             return "UNKNOWN"
+        # (1) real geo DB, if a reader was built at init
+        if self._geo_reader is not None:
+            try:
+                cc = self._geo_reader.city(str(addr)).country.iso_code
+                if cc:
+                    for jur, countries in self.DEFAULT_JURISDICTION_MAP.items():
+                        if cc in countries:
+                            return jur
+                    return cc
+            except Exception:
+                # malformed / out-of-range address -> fall through to demo map
+                pass
         country = None
+        # (2) deterministic demo CIDR prefix list
         for net_cidr, cc in self._demo_ip_map:
             net = ipaddress.ip_network(net_cidr, strict=False)
             if addr in net:
