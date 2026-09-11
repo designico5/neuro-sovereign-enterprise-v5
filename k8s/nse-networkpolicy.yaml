@@ -1,6 +1,12 @@
 # Neuro-Sovereign Enterprise v5 – Network Policy
 # Restricts network access to NSE pods: only allow ingress from same namespace
 # and egress to Redis (port 6379) and DNS (port 53).
+#
+# SPATIAL (Aorta): the broad public egress (0.0.0.0/0:443) that used to live
+# here is REMOVED. External Aorta flow is now declared explicitly and
+# domain-scoped in nse-aorta-egress.yaml (Calico FQDN whitelist). This default
+# policy only allows the in-cluster essentials: DNS + Redis + health probes.
+#
 # Apply with: kubectl apply -f k8s/nse-networkpolicy.yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -31,7 +37,7 @@ spec:
         - protocol: TCP
           port: 8000
   egress:
-    # DNS resolution
+    # DNS resolution (needed to resolve the Aorta FQDN whitelist)
     - to:
         - namespaceSelector:
             matchLabels:
@@ -49,14 +55,6 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
-    # HTTPS egress for external API calls (AI providers, oracles, etc.)
-    - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-            except:
-              - 10.0.0.0/8
-              - 172.16.0.0/12
-              - 192.168.0.0/16
-      ports:
-        - protocol: TCP
-          port: 443
+    # NOTE: no 0.0.0.0/0 public egress. External Aorta egress is granted ONLY
+    # by nse-aorta-egress.yaml (Calico FQDN whitelist). If that file is not
+    # applied, external HTTPS is denied by default-deny.

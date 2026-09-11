@@ -82,3 +82,7 @@ ruff>=0.7.0
 bandit>=1.7.10
 pre-commit>=4.0.1
 pip-audit>=2.7.1
+# --- Geo (optional, L16 real IP->jurisdiction) ---
+# Used only when NSE_GEO_PROVIDER=geoip2 + NSE_GEO_DB_PATH points at a MaxMind DB reader file.
+# L16 transparently falls back to the demo CIDR map when not installed (NOT a core dep).
+geoip2>=5.0.0

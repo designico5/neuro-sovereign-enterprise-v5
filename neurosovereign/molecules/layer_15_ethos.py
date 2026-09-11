@@ -332,6 +332,27 @@ class EthosIdentityLayer(BaseNSELayer):
             self.bump_fail()
             return False
 
+    def get_anchor(self, anchor_id: str) -> Optional[IdentityAnchor]:
+        """Public accessor so callers (e.g. the CLI) never reach into ``self._conn``.
+
+        Reconstructs the signed ``IdentityAnchor`` row that the layer already
+        persists, keeping the SQLite connection private to the molecule.
+        """
+        assert self._conn is not None
+        row = self._conn.execute(
+            "SELECT anchor_id,identity_id,nonce,signed_at,expires_at,payload_hash,"
+            "signature_b64,signing_pubkey_b64,proof_json FROM anchors WHERE anchor_id=?",
+            (anchor_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return IdentityAnchor(
+            anchor_id=row[0], identity_id=row[1], nonce=row[2],
+            signed_at=row[3], expires_at=row[4], payload_hash=row[5],
+            signature_b64=row[6], signing_pubkey_b64=row[7],
+            proof=json.loads(row[8]) if row[8] else {},
+        )
+
     # ===================================================== encryption (NaCl SecretBox + X25519)
     def _nacl_private_key(self, sk: Any) -> Any:
         """Convert a ``cryptography`` X25519PrivateKey into a PyNaCl PrivateKey."""

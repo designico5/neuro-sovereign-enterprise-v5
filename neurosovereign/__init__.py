@@ -221,7 +221,7 @@ class NSEPlatform:
 
     # ------------------------------------------------------------- Layer boots
     async def _start_layer_1_energy(self) -> None:
-        from .layers.layer_1_energy import EnergyFeedbackEngine
+        from .molecules.layer_1_energy import EnergyFeedbackEngine
 
         if not self.config.enable_layer_1_energy:
             self._layers[1].enabled = False
@@ -234,7 +234,7 @@ class NSEPlatform:
         self._layers[1].metrics = impl.metrics()
 
     async def _start_layer_2_compute(self) -> None:
-        from .layers.layer_2_compute import ComputeSiliconManager
+        from .molecules.layer_2_compute import ComputeSiliconManager
 
         if not self.config.enable_layer_2_compute:
             self._layers[2].enabled = False
@@ -247,7 +247,7 @@ class NSEPlatform:
         self._layers[2].metrics = impl.metrics()
 
     async def _start_layer_3_infra(self) -> None:
-        from .layers.layer_3_infra import InfrastructureManager
+        from .molecules.layer_3_infra import InfrastructureManager
 
         if not self.config.enable_layer_3_infra:
             self._layers[3].enabled = False
@@ -260,7 +260,7 @@ class NSEPlatform:
         self._layers[3].metrics = impl.metrics()
 
     async def _start_layer_4_data(self) -> None:
-        from .layers.layer_4_data import KnowledgeDataLayer
+        from .molecules.layer_4_data import KnowledgeDataLayer
 
         if not self.config.enable_layer_4_data:
             self._layers[4].enabled = False
@@ -273,7 +273,7 @@ class NSEPlatform:
         self._layers[4].metrics = impl.metrics()
 
     async def _start_layer_5_integration(self) -> None:
-        from .layers.layer_5_integration import IntegrationAPIGateway
+        from .molecules.layer_5_integration import IntegrationAPIGateway
 
         if not self.config.enable_layer_5_integration:
             self._layers[5].enabled = False
@@ -286,7 +286,7 @@ class NSEPlatform:
         self._layers[5].metrics = impl.metrics()
 
     async def _start_layer_6_cognitive(self) -> None:
-        from .layers.layer_6_cognitive import SafeExecutionSandbox
+        from .molecules.layer_6_cognitive import SafeExecutionSandbox
 
         if not self.config.enable_layer_6_cognitive:
             self._layers[6].enabled = False
@@ -299,7 +299,7 @@ class NSEPlatform:
         self._layers[6].metrics = impl.metrics()
 
     async def _start_layer_7_evolution(self) -> None:
-        from .layers.layer_7_evolution import CodeEvolutionEngine
+        from .molecules.layer_7_evolution import CodeEvolutionEngine
 
         if not self.config.enable_layer_7_evolution:
             self._layers[7].enabled = False
@@ -312,7 +312,7 @@ class NSEPlatform:
         self._layers[7].metrics = impl.metrics()
 
     async def _start_layer_8_verification(self) -> None:
-        from .layers.layer_8_verification import VerificationProofEngine
+        from .molecules.layer_8_verification import VerificationProofEngine
 
         if not self.config.enable_layer_8_verification:
             self._layers[8].enabled = False
@@ -325,7 +325,7 @@ class NSEPlatform:
         self._layers[8].metrics = impl.metrics()
 
     async def _start_layer_9_cognition_plus(self) -> None:
-        from .layers.layer_9_cognition import NeuroSymbolicEngine
+        from .molecules.layer_9_cognition import NeuroSymbolicEngine
 
         if not self.config.enable_layer_9_cognition_plus:
             self._layers[9].enabled = False
@@ -338,7 +338,7 @@ class NSEPlatform:
         self._layers[9].metrics = impl.metrics()
 
     async def _start_layer_10_swarm(self) -> None:
-        from .layers.layer_10_swarm import OrchestrationSwarm
+        from .molecules.layer_10_swarm import OrchestrationSwarm
 
         if not self.config.enable_layer_10_swarm:
             self._layers[10].enabled = False
@@ -351,7 +351,7 @@ class NSEPlatform:
         self._layers[10].metrics = impl.metrics()
 
     async def _start_layer_11_dao(self) -> None:
-        from .layers.layer_11_dao import DAOGovernanceEngine
+        from .molecules.layer_11_dao import DAOGovernanceEngine
 
         if not self.config.enable_layer_11_dao:
             self._layers[11].enabled = False
@@ -364,7 +364,7 @@ class NSEPlatform:
         self._layers[11].metrics = impl.metrics()
 
     async def _start_layer_12_vision(self) -> None:
-        from .layers.layer_12_vision import VisionAndGoals
+        from .molecules.layer_12_vision import VisionAndGoals
 
         if not self.config.enable_layer_12_vision:
             self._layers[12].enabled = False
@@ -377,7 +377,7 @@ class NSEPlatform:
         self._layers[12].metrics = impl.metrics()
 
     async def _start_layer_13_strategy(self) -> None:
-        from .layers.layer_13_strategy import StrategyMarketEngine
+        from .molecules.layer_13_strategy import StrategyMarketEngine
 
         if not self.config.enable_layer_13_strategy:
             self._layers[13].enabled = False
@@ -390,7 +390,7 @@ class NSEPlatform:
         self._layers[13].metrics = impl.metrics()
 
     async def _start_layer_14_governance(self) -> None:
-        from .layers.layer_14_governance import ComplianceGovernance
+        from .molecules.layer_14_governance import ComplianceGovernance
 
         if not self.config.enable_layer_14_governance:
             self._layers[14].enabled = False
@@ -403,7 +403,7 @@ class NSEPlatform:
         self._layers[14].metrics = impl.metrics()
 
     async def _start_layer_15_ethos(self) -> None:
-        from .layers.layer_15_ethos import EthosIdentityLayer
+        from .molecules.layer_15_ethos import EthosIdentityLayer
 
         if not self.config.enable_layer_15_ethos:
             self._layers[15].enabled = False
@@ -416,7 +416,7 @@ class NSEPlatform:
         self._layers[15].metrics = impl.metrics()
 
     async def _start_layer_16_geo(self) -> None:
-        from .layers.layer_16_geo import GeoPoliticalRouter
+        from .molecules.layer_16_geo import GeoPoliticalRouter
 
         if not self.config.enable_layer_16_geo:
             self._layers[16].enabled = False
@@ -429,7 +429,7 @@ class NSEPlatform:
         self._layers[16].metrics = impl.metrics()
 
     async def _start_layer_17_legal(self) -> None:
-        from .layers.layer_17_legal import LegalSovereigntyEngine
+        from .molecules.layer_17_legal import LegalSovereigntyEngine
 
         if not self.config.enable_layer_17_legal:
             self._layers[17].enabled = False

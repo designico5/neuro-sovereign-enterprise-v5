@@ -159,21 +159,13 @@ def identity_verify(identity_id: str, anchor_id: str, data: Optional[str] = None
         p = NSEPlatform()
         await p.start()
         eth = p.get_layer(15)
-        # Re-fetch anchor from DB
-        row = eth._conn.execute(  # type: ignore[union-attr]
-            "SELECT anchor_id,identity_id,nonce,signed_at,expires_at,payload_hash,signature_b64,signing_pubkey_b64,proof_json "
-            "FROM anchors WHERE anchor_id=?", (anchor_id,),
-        ).fetchone()
-        if not row:
+        # Re-fetch the anchor through the layer's public API (Nexus isolation:
+        # the CLI must not reach into the molecule's private SQLite handle).
+        anc = eth.get_anchor(anchor_id)
+        if anc is None:
             console.print("[red]anchor not found[/red]")
+            await p.stop()
             raise SystemExit(2)
-        from .layers.layer_15_ethos import IdentityAnchor
-        anc = IdentityAnchor(
-            anchor_id=row[0], identity_id=row[1], nonce=row[2],
-            signed_at=row[3], expires_at=row[4], payload_hash=row[5],
-            signature_b64=row[6], signing_pubkey_b64=row[7],
-            proof=json.loads(row[8]) if row[8] else {},
-        )
         payload: Optional[Dict[str, Any]] = None
         if data:
             try:
@@ -225,7 +217,7 @@ def dao_propose(title: str, proposer: str = "root", kind: str = "parameter",
 @dao_app.command("vote")
 def dao_vote(proposal_id: str, choice: str, voter: str = "root") -> None:
     async def _r() -> None:
-        from .layers.layer_11_dao import VoteChoice
+        from .molecules.layer_11_dao import VoteChoice
         p = NSEPlatform()
         await p.start()
         dao = p.get_layer(11)
@@ -257,7 +249,7 @@ def dao_veto(proposal_id: str, vetoer: str = "root", reason: str = "") -> None:
         await p.start()
         dao = p.get_layer(11)
         dao.human_veto(proposal_id, vetoer, reason)
-        console.print(f"[red]Vetoed by {vetoer}[/red]: {reason or '—'}")
+        console.print(f"[red]Vetoed by {vetoer}[/red]: {reason or 'â€”'}")
         await p.stop()
     asyncio.run(_r())
 
@@ -297,7 +289,7 @@ def compliance_check(operation: str, actor: str = "alice",
 def route_cmd(operation: str, ip: str, target: str, categories: str = "personal") -> None:
     """Geo-political routing decision."""
     async def _r() -> None:
-        from .layers.layer_16_geo import DataCategory
+        from .molecules.layer_16_geo import DataCategory
         p = NSEPlatform()
         await p.start()
         g = p.get_layer(16)
@@ -514,7 +506,7 @@ def test_cmd() -> None:
         except Exception as ex: failures.append(f"L4: {ex}")
         try:
             ig = p.get_layer(5);
-            from .layers.layer_5_integration import ConnectorConfig
+            from .molecules.layer_5_integration import ConnectorConfig
             ig.register(ConnectorConfig(name="example", kind="rest", url="https://example.com"))
             st = ig.status_report(); assert len(st) == 1
         except Exception as ex: failures.append(f"L5: {ex}")
@@ -549,7 +541,7 @@ def test_cmd() -> None:
         except Exception as ex: failures.append(f"L9: {ex}")
         # L10 Swarm
         try:
-            from .layers.layer_10_swarm import Task
+            from .molecules.layer_10_swarm import Task
             s10 = p.get_layer(10)
             t = Task(id="t1", name="noop", priority=5)
             await s10.submit(t)
@@ -605,7 +597,7 @@ def test_cmd() -> None:
             # Multisig: 1st admin already = founding; add 2 more
             admin2 = "0x1111111111111111111111111111111111111111"
             admin3 = "0x2222222222222222222222222222222222222222"
-            founding_admin = list(l17.admins)[0]
+            founding_admin = l17.admin_addresses()[0]
             l17.add_admin(founding_admin, admin2)
             l17.add_admin(founding_admin, admin3)
             op = l17.propose_operation(founding_admin, "smoke-multisig", {"x": 1}, required_signatures=3)
@@ -642,7 +634,7 @@ def test_cmd() -> None:
         if failures:
             console.print("[bold red]Failures:[/bold red]")
             for f in failures:
-                console.print(" •", f)
+                console.print(" â€¢", f)
             raise SystemExit(1)
         console.print("[green]All 17 layers smoke-passed.[/green]")
     asyncio.run(_r())

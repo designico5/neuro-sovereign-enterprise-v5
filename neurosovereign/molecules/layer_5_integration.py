@@ -174,7 +174,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             producer.flush(5)
             return {"ok": True, "topic": topic, "bytes": len(str(payload.get("value", "")))}
         except Exception as exc:
-            return {"ok": False, "simulated": True, "error": str(exc), "payload": payload}
+            raise RuntimeError(f"confluent_kafka unavailable for {con.config.name}: {exc}") from exc
 
     async def _mqtt(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         try:  # pragma: no cover - optional dep
@@ -184,7 +184,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             mqtt_pub.single(topic, payload=str(payload.get("value", "")), hostname=con.config.url)
             return {"ok": True, "topic": topic}
         except Exception as exc:
-            return {"ok": False, "simulated": True, "error": str(exc)}
+            raise RuntimeError(f"paho-mqtt unavailable for {con.config.name}: {exc}") from exc
 
     async def _jdbc(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         sql = payload.get("sql")
@@ -205,7 +205,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             conn.close()
             return {"ok": True, "rows": rows}
         except Exception as exc:
-            return {"ok": False, "simulated": True, "sql": sql, "error": str(exc)}
+            raise RuntimeError(f"jaydebeapi unavailable for {con.config.name}: {exc}") from exc
 
     async def _sftp(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         action = payload.get("action", "list")
@@ -231,7 +231,7 @@ class IntegrationAPIGateway(BaseNSELayer):
             result["ok"] = True
             return result
         except Exception as exc:
-            return {"ok": False, "simulated": True, "action": action, "error": str(exc)}
+            raise RuntimeError(f"connector backend unavailable for {con.config.name}: {exc}") from exc
 
     async def _mainframe(self, con: Connector, payload: Dict[str, Any]) -> Dict[str, Any]:
         action = payload.get("action", "connect")
@@ -245,7 +245,73 @@ class IntegrationAPIGateway(BaseNSELayer):
             result["ok"] = True
             return result
         except Exception as exc:
-            return {"ok": False, "simulated": True, "action": action, "error": str(exc)}
+            raise RuntimeError(f"connector backend unavailable for {con.config.name}: {exc}") from exc
+
+    # ---------------------------------------------------- OSINT dispatch
+    async def dispatch_osint_lookup(
+        self,
+        analyzers: List[str],
+        payload: Dict[str, Any],
+        connector_name: str = "osint-intelowl",
+    ) -> Dict[str, Any]:
+        """Dispatch an IntelOwl-style threat-intel lookup through the gateway.
+
+        Public entry-point called by ``osint/connectors.py :: bind_intelowl``.
+        The job is routed via the typed L5 gateway (rate-limit + auth + mTLS)
+        against the Aorta egress whitelist, keeping the CC BY-NC-SAL-4.0
+        IntelOwl service out-of-process (no license leakage into the core).
+
+        Parameters
+        ----------
+        analyzers: list of IntelOwl analyzer / detector names to run.
+        payload: IntelOwl-style payload (``value``, ``rttl``, ``tags``, ...).
+        connector_name: L5 gateway connector id (default ``osint-intelowl``).
+
+        Returns
+        -------
+        ``{"job_id", "ok", "status", "body", "analyzers", "connector", "ms"}``
+
+        Raises
+        ------
+        KeyError when the connector is not registered.
+        RuntimeError on transport failure (rate-limit, backend down, ...)
+        """
+        con = self.connectors.get(connector_name)
+        if con is None:
+            raise KeyError(
+                f"OSINT dispatch: connector '{connector_name}' not registered. "
+                "Register it first with "
+                "l5.register(ConnectorConfig(name='osint-intelowl', kind='rest', "
+                "url='https://intelowl.internal')) and add its FQDN to "
+                "the Aorta egress whitelist (k8s/nse-aorta-egress.yaml)."
+            )
+        # Generic IntelOwl-style API call:
+        #   POST /api/v1/analysis/job  {"value":..., "analyzers":[...]}
+        job = await self.call(
+            connector_name,
+            method="POST",
+            path="api/v1/analysis/job",
+            payload={
+                **payload,
+                "analyzers": [a.get("name", a) if isinstance(a, dict) else a for a in analyzers],
+            },
+        )
+        body = job.get("body")
+        job_id = None
+        if isinstance(body, dict):
+            job_id = body.get("id") or body.get("job_id") or None
+        result: Dict[str, Any] = {
+            "job_id": str(job_id) if job_id is not None else None,
+            "ok": job.get("status", 0) in (200, 201, 202),
+            "status": job.get("status"),
+            "body": body,
+            "analyzers": list(analyzers),
+            "connector": connector_name,
+            "ms": round(job.get("ms", 0.0), 2),
+        }
+        if not result["ok"]:
+            self.bump_fail()
+        return result
 
     # ------------------------------------------------------------ auth util
     def _auth_header(self, con: Connector) -> Optional[str]:

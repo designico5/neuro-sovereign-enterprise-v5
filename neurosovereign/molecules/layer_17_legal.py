@@ -179,6 +179,10 @@ class LegalSovereigntyEngine(BaseNSELayer):
             raise PermissionError(f"{address} is not an admin")
 
     # =========================================================== rate limit
+    def admin_addresses(self) -> list:
+        """Public view of the current multi-sig admin set (keeps ``admins`` private)."""
+        return sorted(self.admins)
+
     def _check_rate_limit(self, operator: str) -> None:
         now = time.time()
         ts_list = self._rate_limit.setdefault(operator, [])
