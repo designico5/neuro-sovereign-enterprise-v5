@@ -43,25 +43,31 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis",
-        "arch": ["x64"]
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
       ],
       "artifactName": "NeuroSovereign-Enterprise-Setup-${version}.${ext}"
     },
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
-        { "target": "dmg",
+        {
+          "target": "dmg",
           "arch": ["x64", "arm64"]
-      },
+        }
+      ],
       "hardenedRuntime": true,
       "gatekeeperAssess": false
     },
     "linux": {
       "category": "Office",
       "target": [
-        { "target": "AppImage",
+        {
+          "target": "AppImage",
           "arch": ["x64"]
+        }
       ]
     }
   }

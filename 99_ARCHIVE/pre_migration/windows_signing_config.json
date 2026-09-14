@@ -1,0 +1,190 @@
+{
+  "platform": "windows",
+  "signing_configuration": {
+    "certificate": {
+      "type": "Authenticode Code Signing Certificate",
+      "file": "certificates/windows_code_signing.pfx",
+      "password_env": "WINDOWS_CERT_PASSWORD",
+      "subject": "CN=Your Company Name, O=Your Organization, L=City, S=State, C=Country",
+      "issuer": "DigiCert",
+      "validity": "3_years",
+      "key_size": 4096,
+      "hash_algorithm": "SHA256"
+    },
+    "timestamp_servers": [
+      {
+        "url": "http://timestamp.digicert.com",
+        "priority": 1,
+        "algorithm": "SHA256"
+      },
+      {
+        "url": "http://timestamp.sectigo.com", 
+        "priority": 2,
+        "algorithm": "SHA256"
+      },
+      {
+        "url": "http://timestamp.globalsign.com",
+        "priority": 3,
+        "algorithm": "SHA256"
+      }
+    ],
+    "signing_tools": {
+      "signtool": {
+        "path": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64\\signtool.exe",
+        "version": "10.0.19041.0",
+        "alternative": "SignTool.exe"
+      }
+    },
+    "microsoft_verified_publisher": {
+      "enabled": true,
+      "account_required": true,
+      "verification_required": true
+    }
+  },
+  "signing_process": {
+    "pre_signing": {
+      "verify_build": true,
+      "check_dependencies": true,
+      "security_scan": true,
+      "virus_scan": true
+    },
+    "signing_steps": [
+      {
+        "tool": "signtool",
+        "target": "executable",
+        "options": [
+          "sign",
+          "/f",
+          "/p",
+          "/tr",
+          "/td",
+          "/fd",
+          "/as"
+        ]
+      },
+      {
+        "tool": "signtool",
+        "target": "installer", 
+        "options": [
+          "sign",
+          "/f",
+          "/p", 
+          "/tr",
+          "/td",
+          "/fd",
+          "/as"
+        ]
+      },
+      {
+        "tool": "signtool",
+        "target": "driver",
+        "options": [
+          "sign",
+          "/f",
+          "/p",
+          "/ac",
+          "/tr",
+          "/td",
+          "/fd"
+        ]
+      }
+    ],
+    "post_signing": {
+      "verify_signature": true,
+      "check_timestamp": true,
+      "blockchain_anchor": true,
+      "upload_to_microsoft": true
+    }
+  },
+  "application_types": {
+    "executable": {
+      "extensions": [".exe", ".dll"],
+      "signing_required": true,
+      "description": "Main application binaries"
+    },
+    "installer": {
+      "extensions": [".msi", ".msix", ".appx"],
+      "signing_required": true,
+      "description": "Installation packages"
+    },
+    "driver": {
+      "extensions": [".sys", ".cat"],
+      "signing_required": true,
+      "description": "System drivers (requires EV certificate)"
+    },
+    "script": {
+      "extensions": [".ps1", ".vbs"],
+      "signing_required": false,
+      "description": "Optional script signing"
+    }
+  },
+  "security_hardening": {
+    "compiler_flags": [
+      "/GS",
+      "/DYNAMICBASE",
+      "/NXCOMPAT",
+      "/SAFESEH",
+      "/HIGHENTROPYVA"
+    ],
+    "linker_flags": [
+      "/DYNAMICBASE",
+      "/NXCOMPAT", 
+      "/INTEGRITYCHECK"
+    ],
+    "runtime_protections": {
+      "ASLR": true,
+      "DEP": true,
+      "SEHOP": true,
+      "CFG": true
+    },
+    "manifest": {
+      "requested_execution_level": "asInvoker",
+      "dpiAware": true,
+      "compatibility": "win10"
+    }
+  },
+  "neuro_sovereign_features": {
+    "identity_embedding": true,
+    "compliance_check": true,
+    "audit_trail": true,
+    "blockchain_verification": true,
+    "microsoft_integration": true
+  },
+  "build_frameworks": {
+    "electron": {
+      "supported": true,
+      "package_manager": "electron-builder",
+      "configuration": "electron-builder.yml",
+      "windows_target": ["nsis", "msi", "appx"]
+    },
+    "dotnet": {
+      "supported": true,
+      "frameworks": [".NET 6", ".NET 8"],
+      "signing_integration": "automatic"
+    },
+    "native_windows": {
+      "supported": true,
+      "build_system": "MSBuild",
+      "project_types": ["exe", "dll", "win32"]
+    },
+    "cross_platform": {
+      "supported": true,
+      "frameworks": ["Flutter", "React Native", "Qt"]
+    }
+  },
+  "smart_screen_bypass": {
+    "reputation_building": {
+      "enabled": true,
+      "methods": [
+        "time_delayed_distribution",
+        "gradual_rollout",
+        "beta_testing_program"
+      ]
+    },
+    "certificate_requirements": {
+      "minimum_age": "30_days",
+      "ev_certificate": "recommended",
+      "microsoft_verified_publisher": "recommended"
+    }
+  }
+}

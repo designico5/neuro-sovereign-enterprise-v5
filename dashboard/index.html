@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NEXUS TORUS · Live 3D · NSE-v5</title>
+<style>
+:root{
+  --bg:#04060d;--panel:rgba(10,16,32,.7);--line:rgba(120,160,255,.18);
+  --txt:#cfe0ff;--dim:#7d8bb0;--core:#ffd08a;--good:#6bff8f
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);
+  font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--txt)}
+#scene-holder{position:fixed;inset:0;z-index:0}
+canvas{display:block}
+#ui{position:fixed;inset:0;z-index:5;pointer-events:none}
+.panel{position:absolute;pointer-events:auto;background:var(--panel);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 40px rgba(0,0,0,.5),inset 0 0 30px rgba(80,120,255,.05)}
+#hdr{top:16px;left:50%;transform:translateX(-50%);padding:10px 22px;
+  display:flex;align-items:center;gap:14px;max-width:700px}
+#hdr .glyph{font-size:28px;filter:drop-shadow(0 0 12px rgba(120,180,255,.7))}
+#hdr h1{font-size:15px;letter-spacing:.14em;font-weight:600;color:#eaf1ff}
+#hdr .sub{font-size:10.5px;color:var(--dim);letter-spacing:.08em;margin-top:2px}
+#hdr .live{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--good);
+  letter-spacing:.1em;margin-left:8px;border-left:1px solid var(--line);padding-left:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);
+  box-shadow:0 0 10px var(--good);animation:pls 1.4s infinite}
+@keyframes pls{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+#lay{top:92px;left:16px;width:252px;padding:14px}
+#met{top:92px;right:16px;width:264px;padding:14px}
+#phz{bottom:132px;left:16px;width:252px;padding:12px 14px}
+#gnm{bottom:132px;right:16px;width:264px;padding:12px 14px}
+#fcs{bottom:16px;left:50%;transform:translateX(-50%);width:min(860px,62vw);
+  padding:13px 18px;display:none;gap:18px;align-items:flex-start}
+#fcs.show{display:flex}
+h2{font-size:11px;letter-spacing:.16em;color:var(--dim);margin-bottom:10px;font-weight:600}
+.lr{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;
+  cursor:pointer;transition:.18s;border:1px solid transparent;margin-bottom:4px;position:relative}
+.lr:hover{background:rgba(90,130,255,.09);border-color:var(--line)}
+.lr.on{background:rgba(90,130,255,.15);border-color:rgba(120,160,255,.45);
+  box-shadow:inset 0 0 20px rgba(90,130,255,.14)}
+.lr .g{font-size:18px;width:22px;text-align:center;flex:none}
+.lr .n{font-size:13px;font-weight:600;flex:1}
+.lr .r{font-size:10px;color:var(--dim)}
+.lr .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.mt{margin-bottom:11px}
+.mt .tp{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px}
+.mt .vl{font-variant-numeric:tabular-nums;font-weight:600;color:#eaf1ff}
+.mt .lb{color:var(--dim)}
+.brr{height:6px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden}
+.brr>i{display:block;height:100%;border-radius:4px;transition:width .5s ease}
+.tg{font-size:9.5px;color:var(--dim);margin-top:3px}
+.prc{display:flex;gap:8px}
+.pc{flex:1;text-align:center;padding:9px 0;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line);transition:.3s}
+.pc .n{font-size:20px;font-weight:700}
+.pc .h{font-size:9px;color:var(--dim);letter-spacing:.1em}
+.pc.on{background:rgba(90,140,255,.18);border-color:rgba(120,160,255,.5);
+  box-shadow:0 0 18px rgba(90,140,255,.35)}
+.spk{display:flex;gap:8px;margin-top:10px}
+.sk{flex:1;text-align:center;font-size:9.5px;padding:6px 0;border-radius:8px;
+  background:rgba(255,208,138,.06);border:1px solid rgba(255,208,138,.16);color:#ffe6bf;transition:.3s}
+.sk.on{border-color:#ffd08a;box-shadow:0 0 12px rgba(255,208,138,.45);background:rgba(255,208,138,.14)}
+.sk b{display:block;font-size:13px;color:var(--core)}
+.gn{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:11.5px}
+.gn .mk{width:9px;height:9px;border-radius:50%;flex:none}
+.gn .nm{flex:1}
+.gn .mu{font-variant-numeric:tabular-nums;color:var(--core);font-weight:600}
+.fgs{font-size:30px;flex:none;margin-top:2px}
+.fbd{flex:1}
+.ftl{font-size:14px;font-weight:600;margin-bottom:4px}
+.frl{font-size:11px;color:var(--dim);margin-bottom:8px}
+.ftc{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:10px;padding:3px 8px;border-radius:20px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);color:#dfe8ff}
+#wrn{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);
+  padding:14px 20px;background:rgba(120,30,40,.72);border:1px solid rgba(255,90,106,.5);
+  font-size:12px;color:#ffd;max-width:420px;text-align:center;display:none;pointer-events:auto;z-index:10}
+#stat{position:absolute;top:14px;left:16px;font-size:10px;color:var(--dim);
+  letter-spacing:.06em;pointer-events:none;z-index:6}
+/* Narrow / preview viewport: stack panels as a scrollable column (never hide content) */
+@media(max-width:1080px){
+  #stat{display:none}
+  #ui{overflow:auto;display:flex;flex-direction:column;gap:14px;
+     padding:70px 14px 16px;pointer-events:auto}
+  .panel{position:relative;left:auto!important;right:auto!important;
+     top:auto!important;bottom:auto!important;transform:none!important;
+     width:auto!important;margin:0;max-width:560px}
+  #hdr{order:-1;margin-bottom:2px}
+  #fcs{display:none}
+}
+@media(max-width:520px){
+  #met,#gnm,#phz,#lay{font-size:12px}
+  .lr .r{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Statische HTML-Panels (immer sichtbar, unabhängig von React/Three.js) ── -->
+<div id="scene-holder"></div>
+
+<div id="stat">
+  STATUS: <span id="st-3d">3D: --</span> · <span id="st-live">LIVE: --</span>
+</div>
+
+<div id="ui">
+
+  <!-- Header -->
+  <div class="panel" id="hdr">
+    <span class="glyph">⟁</span>
+    <div>
+      <h1>NEXUS TORUS · NSE-v5</h1>
+      <div class="sub">LEBENDIGE 3D-RAUMSTRUKTUR · 17→5-SCHICHT-KOMPRIERUNG · 369/SPARK²</div>
+    </div>
+    <div class="live"><span class="dot"></span> LIVE</div>
+  </div>
+
+  <!-- Layer List -->
+  <div class="panel" id="lay">
+    <h2>SCHICHTEN (5 + ARCHIV)</h2>
+    <div class="lr" data-id="0" style="--c:#ffd08a">
+      <span class="g" style="color:#ffd08a">⟁</span>
+      <span class="n">01_CORE</span><span class="r">invarianter Kernel</span>
+      <span class="sw" style="background:#ffd08a;box-shadow:0 0 8px #ffd08a"/>
+    </div>
+    <div class="lr" data-id="1" style="--c:#4dd8ff">
+      <span class="g" style="color:#4dd8ff">⟂</span>
+      <span class="n">02_MEMBRANE</span><span class="r">semi-perm. Grenze</span>
+      <span class="sw" style="background:#4dd8ff;box-shadow:0 0 8px #4dd8ff"/>
+    </div>
+    <div class="lr" data-id="2" style="--c:#ff5ad0">
+      <span class="g" style="color:#ff5ad0">◬</span>
+      <span class="n">03_SYNAPSE</span><span class="r">autokat. Netzwerk</span>
+      <span class="sw" style="background:#ff5ad0;box-shadow:0 0 8px #ff5ad0"/>
+    </div>
+    <div class="lr" data-id="3" style="--c:#6bff8f">
+      <span class="g" style="color:#6bff8f">◉</span>
+      <span class="n">04_OBSERVER</span><span class="r">Meta-Ebene</span>
+      <span class="sw" style="background:#6bff8f;box-shadow:0 0 8px #6bff8f"/>
+    </div>
+    <div class="lr" data-id="4" style="--c:#ff9a4d">
+      <span class="g" style="color:#ff9a4d">⏣</span>
+      <span class="n">05_OUTPUT</span><span class="r">manifestierte Realität</span>
+      <span class="sw" style="background:#ff9a4d;box-shadow:0 0 8px #ff9a4d"/>
+    </div>
+    <div class="lr" data-id="5" style="--c:#8b97ad">
+      <span class="g" style="color:#8b97ad">ⓐ</span>
+      <span class="n">99_ARCHIVE</span><span class="r">Verdauungstrakt</span>
+      <span class="sw" style="background:#8b97ad;box-shadow:0 0 8px #8b97ad"/>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="panel" id="met">
+    <h2>LIVE-METRIKEN</h2>
+    <div class="mt" data-metric="genius">
+      <div class="tp"><span class="lb">Genialitäts-Index</span><span class="vl" id="v-genius">0.78</span></div>
+      <div class="brr"><i id="b-genius" style="width:78%;background:#6bff8f;box-shadow:0 0 8px #6bff8f"></i></div>
+      <div class="tg">Ziel ≥ 0.75</div>
+    </div>
+    <div class="mt" data-metric="auto">
+      <div class="tp"><span class="lb">Autokatalyse (G4)</span><span class="vl" id="v-auto">0.53</span></div>
+      <div class="brr"><i id="b-auto" style="width:53%;background:#ffd08a;box-shadow:0 0 8px #ffd08a"></i></div>
+      <div class="tg">Ziel ≥ 0.50</div>
+    </div>
+    <div class="mt" data-metric="iso">
+      <div class="tp"><span class="lb">Isomorphie (G2)</span><span class="vl" id="v-iso">0.62</span></div>
+      <div class="brr"><i id="b-iso" style="width:62%;background:#4dd8ff;box-shadow:0 0 8px #4dd8ff"></i></div>
+    </div>
+    <div class="mt" data-metric="tunnel">
+      <div class="tp"><span class="lb">Quanten-Tunnel (G3)</span><span class="vl" id="v-tunnel">0.41</span></div>
+      <div class="brr"><i id="b-tunnel" style="width:41%;background:#ff5ad0;box-shadow:0 0 8px #ff5ad0"></i></div>
+    </div>
+    <div class="mt" data-metric="irre">
+      <div class="tp"><span class="lb">Irreduzibilität (G5)</span><span class="vl" id="v-irre">0.88</span></div>
+      <div class="brr"><i id="b-irre" style="width:88%;background:#ff9a4d;box-shadow:0 0 8px #ff9a4d"></i></div>
+    </div>
+    <div class="mt" data-metric="fractal">
+      <div class="tp"><span class="lb">Fraktale Komp. (G1)</span><span class="vl" id="v-fractal">0.47</span></div>
+      <div class="brr"><i id="b-fractal" style="width:47%;background:#8b97ad;box-shadow:0 0 8px #8b97ad"></i></div>
+    </div>
+    <div class="mt">
+      <div class="tp"><span class="lb">Symbiose-Score</span><span class="vl" id="v-symb">0.95</span></div>
+    </div>
+    <div class="mt">
+      <div class="tp"><span class="lb">Layer-Health</span><span class="vl" id="v-lh" style="color:#6bff8f">17/17</span></div>
+    </div>
+  </div>
+
+  <!-- Phase + Spark -->
+  <div class="panel" id="phz">
+    <h2>369 / SPARK²</h2>
+    <div class="prc">
+      <div class="pc" data-phase="0"><div class="n">3</div><div class="h">528 Hz</div></div>
+      <div class="pc" data-phase="1"><div class="n">6</div><div class="h">639 Hz</div></div>
+      <div class="pc" data-phase="2"><div class="n">9</div><div class="h">963 Hz</div></div>
+    </div>
+    <div class="spk">
+      <div class="sk" data-spark="0"><b>0.95</b>L1</div>
+      <div class="sk" data-spark="1"><b>1.43</b>L2</div>
+      <div class="sk" data-spark="2"><b>2.14</b>L3</div>
+    </div>
+  </div>
+
+  <!-- Genie -->
+  <div class="panel" id="gnm">
+    <h2>GENIE-MODULE (SPARK-BONUS)</h2>
+    <div class="gn"><span class="mk" style="background:#ffd08a;box-shadow:0 0 8px #ffd08a"></span><span class="nm">Tesla</span><span class="mu">×2.0</span></div>
+    <div class="gn"><span class="mk" style="background:#4dd8ff;box-shadow:0 0 8px #4dd8ff"></span><span class="nm">Ramanujan</span><span class="mu">×2.5</span></div>
+    <div class="gn"><span class="mk" style="background:#ff5ad0;box-shadow:0 0 8px #ff5ad0"></span><span class="nm">Gödel</span><span class="mu">×2.2</span></div>
+    <div class="gn"><span class="mk" style="background:#6bff8f;box-shadow:0 0 8px #6bff8f"></span><span class="nm">Feynman</span><span class="mu">×1.9</span></div>
+    <div class="gn"><span class="mk" style="background:#ff9a4d;box-shadow:0 0 8px #ff9a4d"></span><span class="nm">Jung</span><span class="mu">×1.7</span></div>
+  </div>
+
+  <!-- Focus (versteckt bis Layer-Klick) -->
+  <div class="panel" id="fcs">
+    <span class="fgs" id="f-glyph"></span>
+    <div class="fbd">
+      <div class="ftl" id="f-name"></div>
+      <div class="frl" id="f-role"></div>
+      <div class="ftc" id="f-tags"></div>
+    </div>
+  </div>
+
+  <div id="wrn"></div>
+</div>
+
+<!-- ── Three.js CDN (wenn verfügbar: 3D-Szene; wenn blockiert: statisches UI läuft weiter) ── -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+
+<script>
+/* ═══ DOM DATA ═══ */
+var LAYERS = [
+  { id:0, glyph:"⟁", name:"01_CORE",     css:"#ffd08a", role:"invarianter Kernel",
+    contains:["neurosovereign/ (17 Layer)","neuro_stack_final.toml"],
+    note:"Unveränderlich, aber strahlend. Endosymbiotic-Source." },
+  { id:1, glyph:"⟂", name:"02_MEMBRANE", css:"#4dd8ff", role:"semi-permeable Grenze",
+    contains:["k8s/","terraform/","Dockerfile","docker-compose.yml"],
+    note:"IaC + Container — Grenze zwischen Kernel und Außenwelt." },
+  { id:2, glyph:"◬", name:"03_SYNAPSE",  css:"#ff5ad0", role:"autokatalytisches Netzwerk",
+    contains:["config/ (Layer-Configs)","ai_providers_*"],
+    note:"Layer-Config + AI-Präparate — Konnektome des Systems." },
+  { id:3, glyph:"◉", name:"04_OBSERVER",  css:"#6bff8f", role:"Meta-Ebene",
+    contains:[".github/","security/","signing/","state/"],
+    note:"CI/CD + Security + Signing + State — das Auge des Organismus." },
+  { id:4, glyph:"⏣", name:"05_OUTPUT",   css:"#ff9a4d", role:"manifestierte Realität",
+    contains:["deployment/","voice/","desktop/","setup/"],
+    note:"Alles Sichtbare: Deployment, Voice, Desktop, Setup." },
+  { id:5, glyph:"ⓐ", name:"99_ARCHIVE",  css:"#8b97ad", role:"Verdauungstrakt",
+    contains:["science-codeevolve/","self_improving/","verus/","_manifest.json"],
+    note:"Stasierte Orphans — gelagert, nie gelöscht." }
+];
+var t0 = performance.now();
+
+/* ═══ THREE.JS SCENE ═══ */
+var focusId = -1;
+var threeOK = false;
+
+(function initThree(){
+  if (typeof THREE === "undefined") {
+    document.getElementById("wrn").style.display="block";
+    document.getElementById("wrn").textContent="⚠ Three.js CDN blockiert — statisches UI läuft weiter, 3D-Szene nicht verfügbar.";
+    document.getElementById("st-3d").textContent="3D: CDN BLOCKIERT";
+    return;
+  }
+  threeOK = true;
+  document.getElementById("st-3d").textContent="3D: AKTIV";
+
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x04060d, 0.016);
+
+  var cam = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 2000);
+  var rdr = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  rdr.setPixelRatio(Math.min(devicePixelRatio, 2));
+  rdr.setSize(innerWidth, innerHeight);
+  document.getElementById("scene-holder").appendChild(rdr.domElement);
+
+  scene.add(new THREE.AmbientLight(0x223355, 0.6));
+  var keyL = new THREE.PointLight(0x88aaff, 1.1, 120);
+  keyL.position.set(10,18,14); scene.add(keyL);
+  var coreLt = new THREE.PointLight(0xffd08a, 1.4, 40); scene.add(coreLt);
+  var world = new THREE.Group(); scene.add(world);
+
+  /* Starfield */
+  var starGeo = new THREE.BufferGeometry();
+  var starN = 1500, sp = new Float32Array(starN*3);
+  for (var si=0; si<starN; si++) {
+    var sr = 60+Math.random()*260, sth=Math.random()*Math.PI*2, sph=Math.acos(2*Math.random()-1);
+    sp[si*3]=sr*Math.sin(sph)*Math.cos(sth);
+    sp[si*3+1]=sr*Math.sin(sph)*Math.sin(sth);
+    sp[si*3+2]=sr*Math.cos(sph);
+  }
+  starGeo.setAttribute("position", new THREE.BufferAttribute(sp,3));
+  var starPts = new THREE.Points(starGeo, new THREE.PointsMaterial({
+    color:0x9fb8ff, size:0.7, transparent:true, opacity:0.8,
+    blending:THREE.AdditiveBlending, depthWrite:false }));
+  scene.add(starPts);
+
+  /* Layer rings */
+  var RING_DEFS = [
+    {id:0,r:4.0,tilt:.15,op:.85},{id:1,r:6.5,tilt:.35,op:.55},
+    {id:2,r:9.0,tilt:.55,op:.45},{id:3,r:11.5,tilt:.75,op:.35},
+    {id:4,r:14.0,tilt:.95,op:.30},{id:5,r:16.5,tilt:1.15,op:.20}
+  ];
+  var rings = [];
+  RING_DEFS.forEach(function(rd){
+    var L = LAYERS[rd.id];
+    var g = new THREE.Group();
+    var ring = new THREE.Mesh(
+      new THREE.TorusGeometry(rd.r, 0.06, 20, 220),
+      new THREE.MeshBasicMaterial({ color:new THREE.Color(L.css), transparent:true, opacity:rd.op })
+    );
+    ring.rotation.x = Math.PI/2 + rd.tilt*0.4;
+    ring.userData.layerId = rd.id;
+    g.add(ring);
+    var glow = new THREE.Mesh(
+      new THREE.TorusGeometry(rd.r, 0.28, 16, 180),
+      new THREE.MeshBasicMaterial({ color:new THREE.Color(L.css), transparent:true,
+        opacity:rd.op*0.22, blending:THREE.AdditiveBlending, depthWrite:false })
+    );
+    glow.rotation.copy(ring.rotation);
+    g.add(glow);
+    g.rotation.x = rd.tilt;
+    world.add(g);
+    rings.push({ g:g, ring:ring, glow:glow, baseOp:rd.op, id:rd.id });
+  });
+
+  /* Core: 17-layer golden-angle stack */
+  var core = new THREE.Group();
+  var cSp = new THREE.Mesh(
+    new THREE.SphereGeometry(1.1, 40, 40),
+    new THREE.MeshStandardMaterial({ color:0xffd08a, emissive:0xffb347,
+      emissiveIntensity:0.9, roughness:0.3, metalness:0.4 })
+  );
+  cSp.userData.layerId = 0;
+  core.add(cSp);
+  var cGl = new THREE.Mesh(
+    new THREE.SphereGeometry(1.7, 32, 32),
+    new THREE.MeshBasicMaterial({ color:0xffd08a, transparent:true, opacity:0.18,
+      blending:THREE.AdditiveBlending, depthWrite:false })
+  );
+  core.add(cGl);
+  var stack = [];
+  for (var li=0; li<17; li++) {
+    var la = li*2.399, lr = 1.55+(li%3)*0.12;
+    var lp = new THREE.Mesh(
+      new THREE.SphereGeometry(0.085, 12, 12),
+      new THREE.MeshBasicMaterial({ color:new THREE.Color().setHSL(0.08+li*0.012,0.9,0.62),
+        transparent:true, opacity:0.95 })
+    );
+    lp.position.set(Math.cos(la)*lr, (li-8)*0.16, Math.sin(la)*lr);
+    lp.userData.layerId = 0;
+    stack.push(lp);
+    core.add(lp);
+  }
+  world.add(core);
+
+  /* Metabolismus particles */
+  var MN = 520;
+  var mGeo = new THREE.BufferGeometry();
+  var mPos = new Float32Array(MN*3), mCol = new Float32Array(MN*3);
+  var cA=new THREE.Color(0x4dd8ff), cB=new THREE.Color(0xff5ad0), cC=new THREE.Color(0xffd08a);
+  for (var mi=0; mi<MN; mi++) {
+    var mt = mi/MN;
+    var mc = mt<0.5 ? cA.clone().lerp(cB, mt*2) : cB.clone().lerp(cC, (mt-0.5)*2);
+    mCol[mi*3]=mc.r; mCol[mi*3+1]=mc.g; mCol[mi*3+2]=mc.b;
+  }
+  mGeo.setAttribute("position", new THREE.BufferAttribute(mPos,3));
+  mGeo.setAttribute("color", new THREE.BufferAttribute(mCol,3));
+  var metaPts = new THREE.Points(mGeo, new THREE.PointsMaterial({
+    size:0.16, vertexColors:true, transparent:true, opacity:0.9,
+    blending:THREE.AdditiveBlending, depthWrite:false }));
+  world.add(metaPts);
+
+  /* Hexad ring */
+  var hexa = new THREE.Group();
+  for (var hi=0; hi<6; hi++) {
+    var ha = hi/6*Math.PI*2;
+    var hMesh = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.28, 0),
+      new THREE.MeshStandardMaterial({ color:0x9fe0ff, emissive:0x2a6f9f,
+        emissiveIntensity:0.6, roughness:0.2, metalness:0.5 })
+    );
+    hMesh.position.set(Math.cos(ha)*2.6, 0, Math.sin(ha)*2.6);
+    hexa.add(hMesh);
+  }
+  world.add(hexa);
+
+  /* Genie nodes */
+  var genNodes = new THREE.Group();
+  var GENIE_DEFS = [
+    {n:"Tesla",c:0xffd08a},{n:"Ramanujan",c:0x4dd8ff},{n:"Gödel",c:0xff5ad0},
+    {n:"Feynman",c:0x6bff8f},{n:"Jung",c:0xff9a4d}
+  ];
+  GENIE_DEFS.forEach(function(g,gi){
+    var ga = gi/5*Math.PI*2 - Math.PI/2;
+    var gMesh = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.3, 1),
+      new THREE.MeshStandardMaterial({ color:g.c, emissive:g.c,
+        emissiveIntensity:0.55, roughness:0.3, metalness:0.5 })
+    );
+    gMesh.position.set(Math.cos(ga)*3.4, 1.2, Math.sin(ga)*3.4);
+    genNodes.add(gMesh);
+  });
+  world.add(genNodes);
+
+  /* Camera control */
+  var theta=0.6, phi=1.15, radius=18.5, dragging=false, px=0, py=0;
+  var dom = rdr.domElement;
+  function applyCam(){
+    phi = Math.max(0.25, Math.min(Math.PI-0.25, phi));
+    radius = Math.max(6, Math.min(60, radius));
+    cam.position.set(
+      radius*Math.sin(phi)*Math.sin(theta),
+      radius*Math.cos(phi),
+      radius*Math.sin(phi)*Math.cos(theta)
+    );
+    cam.lookAt(0,0,0);
+  }
+  dom.addEventListener("pointerdown", function(e){
+    dragging=true; px=e.clientX; py=e.clientY;
+    dom.setPointerCapture(e.pointerId);
+  });
+  dom.addEventListener("pointerup", function(e){
+    dragging=false;
+    try{dom.releasePointerCapture(e.pointerId)}catch(_){}
+  });
+  dom.addEventListener("pointermove", function(e){
+    if(!dragging) return;
+    theta -= (e.clientX-px)*0.005;
+    phi   -= (e.clientY-py)*0.005;
+    px=e.clientX; py=e.clientY; applyCam();
+  });
+  dom.addEventListener("wheel", function(e){
+    e.preventDefault();
+    radius *= (1 + (e.deltaY>0 ? 0.08 : -0.08));
+    applyCam();
+  }, {passive:false});
+  applyCam();
+  dom.style.cursor = "grab";
+
+  /* Raycast click → focus */
+  var ray = new THREE.Raycaster(), mouseV = new THREE.Vector2();
+  dom.addEventListener("click", function(e){
+    var rc = dom.getBoundingClientRect();
+    mouseV.x =  ((e.clientX-rc.left)/rc.width)*2-1;
+    mouseV.y = -((e.clientY-rc.top)/rc.height)*2+1;
+    ray.setFromCamera(mouseV, cam);
+    var hitAll = [cSp, cGl].concat(rings.map(function(r){return r.ring;}));
+    var hits = ray.intersectObjects(hitAll, false);
+    var id = -1;
+    if (hits.length) id = hits[0].object.userData.layerId;
+    else {
+      var sHits = ray.intersectObjects(stack, false);
+      if (sHits.length) id = 0;
+    }
+    if (id>=0) setFocus(id);
+  });
+
+  /* Animate */
+  var clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    var dt = clock.getDelta(), t = clock.elapsedTime;
+
+    world.rotation.y  += dt*0.06;
+    hexa.rotation.y   -= dt*0.3;
+    genNodes.rotation.y += dt*0.18;
+    starPts.rotation.y += dt*0.008;
+
+    var pulse = 1 + Math.sin(t*2.2)*0.06;
+    cSp.scale.setScalar(pulse);
+    cGl.scale.setScalar(pulse*1.1);
+    coreLt.intensity = 1.3 + Math.sin(t*2.2)*0.4;
+
+    stack.forEach(function(sp,si){
+      sp.scale.setScalar(1 + Math.sin(t*2.2+si*0.35)*0.35);
+      sp.position.y = (si-8)*0.16*(1+Math.sin(t*1.1)*0.08);
+    });
+
+    for(var i=0;i<MN;i++){
+      var a=t*0.25+i*0.02, rr=5+Math.sin(t*0.5+i*0.35)*2.6;
+      mPos[i*3]=Math.cos(a)*rr;
+      mPos[i*3+1]=Math.sin(a*0.7+i*0.13)*1.1;
+      mPos[i*3+2]=Math.sin(a)*rr;
+    }
+    mGeo.attributes.position.needsUpdate=true;
+
+    rings.forEach(function(rd){
+      var targetOp = (focusId===rd.id) ? rd.baseOp+0.4 : rd.baseOp;
+      rd.ring.material.opacity += (targetOp - rd.ring.material.opacity)*0.12;
+      var glowOp = (focusId===rd.id) ? 0.55 : 0.0;
+      rd.glow.material.opacity += (glowOp - rd.glow.material.opacity)*0.08;
+      rd.g.scale.setScalar(1 + Math.sin(t*1.5+rd.id)*0.006);
+    });
+
+    rdr.render(scene, cam);
+  }
+  animate();
+
+  addEventListener("resize", function(){
+    cam.aspect = innerWidth/innerHeight;
+    cam.updateProjectionMatrix();
+    rdr.setSize(innerWidth, innerHeight);
+  });
+})();
+
+/* ═══ FOCUS / UI STATE ═══ */
+function setFocus(id){
+  focusId = id;
+  var rows = document.querySelectorAll(".lr");
+  rows.forEach(function(r){
+    r.classList.toggle("on", parseInt(r.dataset.id)===id);
+  });
+  var fcs = document.getElementById("fcs");
+  if (id<0) { fcs.classList.remove("show"); return; }
+  var L = LAYERS[id];
+  document.getElementById("f-glyph").textContent = L.glyph;
+  document.getElementById("f-glyph").style.color = L.css;
+  document.getElementById("f-glyph").style.textShadow = "0 0 16px "+L.css;
+  document.getElementById("f-name").textContent = L.name;
+  document.getElementById("f-name").style.color = L.css;
+  document.getElementById("f-role").textContent = L.role+" · "+L.note;
+  var tagsEl = document.getElementById("f-tags");
+  tagsEl.innerHTML = "";
+  L.contains.forEach(function(c){
+    var s = document.createElement("span");
+    s.className="tag"; s.textContent=c;
+    s.style.borderColor = L.css+"55";
+    tagsEl.appendChild(s);
+  });
+  fcs.classList.add("show");
+}
+
+document.querySelectorAll(".lr").forEach(function(row){
+  row.addEventListener("click", function(){
+    var id = parseInt(row.dataset.id);
+    setFocus(focusId===id ? -1 : id);
+  });
+});
+
+/* ═══ LIVE METRICS (6 Hz) ═══ */
+document.getElementById("st-live").textContent = "LIVE: AKTIV";
+(function(){
+  var BASE = {genius:.78, auto:.53, iso:.62, tunnel:.41, irre:.88, fractal:.47, symb:.95};
+  var AMP  = {genius:.02, auto:.03, iso:.04, tunnel:.05, irre:.03, fractal:.04, symb:.01};
+  var KEYS = ["genius","auto","iso","tunnel","irre","fractal","symb"];
+  setInterval(function(){
+    var t = (performance.now()-t0)/1000;
+    KEYS.forEach(function(k){
+      var v = BASE[k] + Math.sin(t*0.6 + KEYS.indexOf(k)*0.7)*AMP[k];
+      var vEl = document.getElementById("v-"+k);
+      if(vEl) vEl.textContent = v.toFixed(2);
+      var bEl = document.getElementById("b-"+k);
+      if(bEl) bEl.style.width = Math.min(100, v*100)+"%";
+    });
+    /* Phase */
+    var ph = Math.floor(t/3)%3;
+    document.querySelectorAll(".pc").forEach(function(el,i){
+      el.classList.toggle("on", i===ph);
+    });
+    /* Spark */
+    var sp = Math.floor(t/2)%3;
+    document.querySelectorAll(".sk").forEach(function(el,i){
+      el.classList.toggle("on", i===sp);
+    });
+  }, 160);
+})();
+</script>
+</body>
+</html>

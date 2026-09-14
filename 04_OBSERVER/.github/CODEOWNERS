@@ -1,0 +1,39 @@
+# Neuro-Sovereign Enterprise v5 – Code Owners
+# Reviews are automatically requested for the paths below.
+
+# Default owner – everything not explicitly listed below
+* @designico5
+
+# Core platform orchestration
+/neurosovereign/__init__.py          @designico5
+/neurosovereign/cli.py               @designico5
+/neurosovereign/version.py           @designico5
+
+# Layer: Ethos (Ed25519/X25519 identity) – security-critical
+/neurosovereign/layers/layer_15_ethos.py    @designico5
+
+# Layer: Cognitive (sandbox isolation) – security-critical
+/neurosovereign/layers/layer_6_cognitive.py @designico5
+
+# Layer: Verification (GRPO proof receipts)
+/neurosovereign/layers/layer_8_verification.py @designico5
+
+# Layer: DAO (governance, quadratic voting)
+/neurosovereign/layers/layer_11_dao.py      @designico5
+
+# Layer: Legal (smart contract charter)
+/neurosovereign/layers/layer_17_legal.py    @designico5
+/layers/17_legal/                            @designico5
+
+# Infrastructure & CI/CD
+/Dockerfile                        @designico5
+/docker-compose.yml                @designico5
+/k8s/                              @designico5
+/terraform/                        @designico5
+/.github/                          @designico5
+/pyproject.toml                    @designico5
+
+# Security configuration
+/.env.template                     @designico5
+/supply_chain_security.json        @designico5
+/code_signing_infrastructure.json  @designico5

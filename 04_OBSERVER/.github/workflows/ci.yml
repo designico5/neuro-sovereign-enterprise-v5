@@ -38,17 +38,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-deps -e ".[dev]"
           pip install -e .
-          # --no-deps above skips the [dev] extras, so install the linters explicitly
-          pip install ruff mypy
 
       - name: Ruff lint
-        run: ruff check 01_CORE/neurosovereign
+        run: ruff check neurosovereign
 
       - name: Ruff format check
-        run: ruff format --check 01_CORE/neurosovereign
+        run: ruff format --check neurosovereign
 
       - name: Mypy type check
-        run: mypy 01_CORE/neurosovereign || true
+        run: mypy neurosovereign || true
 
   test:
     name: Test (Python ${{ matrix.python }})
@@ -80,7 +78,7 @@ jobs:
 
       - name: Syntax check (all modules compile)
         run: |
-          python -c "import glob; [compile(open(f,'r',encoding='utf-8').read(),f,'exec') for f in glob.glob('01_CORE/neurosovereign/**/*.py',recursive=True)]"
+          python -c "import glob; [compile(open(f,'r',encoding='utf-8').read(),f,'exec') for f in glob.glob('neurosovereign/**/*.py',recursive=True)]"
 
       - name: Smoke test (17 layers)
         run: |
@@ -92,7 +90,7 @@ jobs:
         with:
           name: test-results-py${{ matrix.python }}
           path: |
-            04_OBSERVER/state/
+            state/
             *.log
           if-no-files-found: ignore
 
@@ -121,14 +119,14 @@ jobs:
           pip install bandit pip-audit cyclonedx-py
 
       - name: Bandit scan
-        run: bandit -r 01_CORE/neurosovereign -ll -f json -o bandit-report.json || true
+        run: bandit -r neurosovereign -ll -f json -o bandit-report.json || true
 
       - name: pip-audit (dependency vulnerabilities)
         run: pip-audit --format json -o pip-audit-report.json || true
 
       - name: Generate CycloneDX SBOM
         run: |
-          cyclonedx-py environment -o sbom-ci.json --spec-version 1.5
+          cyclonedx-py environment -o sbom-ci.json --schema-version 1.5
 
       - name: Upload security artifacts
         uses: actions/upload-artifact@v4
@@ -181,7 +179,7 @@ jobs:
           python -c "
           import yaml, glob, sys
           errors = []
-          for f in glob.glob('02_MEMBRANE/k8s/*.yaml'):
+          for f in glob.glob('k8s/*.yaml'):
               try:
                   list(yaml.safe_load_all(open(f)))
                   print(f'  OK: {f}')

@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, SBOM & GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project + tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install cyclonedx-py build twine
+
+      - name: Verify tag matches package version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PACKAGE_VERSION=$(python -c "import neurosovereign.version; print(neurosovereign.version.__version__)")
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match package version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+          echo "Version match OK: $TAG_VERSION"
+
+      - name: Run smoke test
+        run: python -m neurosovereign.cli test
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          cyclonedx-py environment -o sbom-release.json --schema-version 1.5
+
+      - name: Generate SHA-256 checksums
+        run: |
+          sha256sum dist/*.tar.gz dist/*.whl sbom-release.json > checksums.sha256
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t nse:${GITHUB_REF_NAME} \
+            -t nse:latest \
+            .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ## Neuro-Sovereign Enterprise ${{ github.ref_name }}
+
+            ### Artifacts
+            - Python sdist + wheel (see dist/)
+            - CycloneDX SBOM (sbom-release.json)
+            - SHA-256 checksums (checksums.sha256)
+            - Docker image: `nse:${{ github.ref_name }}`
+
+            ### Smoke Test
+            All 17 layers passed initialization.
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+            sbom-release.json
+            checksums.sha256
